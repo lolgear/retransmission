@@ -55,7 +55,7 @@
     }
 
     for (NSView* view in @[ indicatorView, titleField, downloadView, downloadField, uploadAndRatioView, uploadAndRatioField ]) {
-        view.translatesAutoresizingMaskIntoConstraints = false;
+        view.translatesAutoresizingMaskIntoConstraints = NO;
         [self addSubview:view];
     }
 }

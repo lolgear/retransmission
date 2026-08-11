@@ -326,6 +326,7 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
         return torrentCell;
     } else {
         TorrentGroup* group = (TorrentGroup*)item;
+        // TODO(lolgear): Remove group cell from xib.
         GroupCell* groupCell = [outlineView makeViewWithIdentifier:@"NewGroupCell" owner:self];
         if (!groupCell) {
             groupCell = [[GroupCell alloc] initWithFrame:NSZeroRect];
