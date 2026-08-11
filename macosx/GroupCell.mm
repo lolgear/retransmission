@@ -18,33 +18,31 @@
 
 - (void)configureViews
 {
-    __auto_type indicatorView = [[NSImageView alloc] init];
+    auto indicatorView = [[NSImageView alloc] init];
     indicatorView.imageScaling = NSImageScaleProportionallyDown;
     self.fGroupIndicatorView = indicatorView;
 
-    __auto_type titleField = [[NSTextField alloc] init];
+    auto titleField = [[NSTextField alloc] init];
     titleField.textColor = NSColor.secondaryLabelColor;
-    titleField.backgroundColor = NSColor.controlColor;
     titleField.lineBreakMode = NSLineBreakByTruncatingMiddle;
     self.fGroupTitleField = titleField;
+    titleField.allowsExpansionToolTips = YES;
 
-    __auto_type downloadView = [[NSImageView alloc] init];
+    auto downloadView = [[NSImageView alloc] init];
     downloadView.imageScaling = NSImageScaleProportionallyDown;
     self.fGroupDownloadView = downloadView;
 
-    __auto_type downloadField = [[NSTextField alloc] init];
+    auto downloadField = [[NSTextField alloc] init];
     downloadField.textColor = NSColor.secondaryLabelColor;
-    downloadField.backgroundColor = NSColor.textBackgroundColor;
     downloadField.lineBreakMode = NSLineBreakByClipping;
     self.fGroupDownloadField = downloadField;
 
-    __auto_type uploadAndRatioView = [[NSImageView alloc] init];
+    auto uploadAndRatioView = [[NSImageView alloc] init];
     uploadAndRatioView.imageScaling = NSImageScaleProportionallyDown;
     self.fGroupUploadAndRatioView = uploadAndRatioView;
 
-    __auto_type uploadAndRatioField = [[NSTextField alloc] init];
+    auto uploadAndRatioField = [[NSTextField alloc] init];
     uploadAndRatioField.textColor = NSColor.secondaryLabelColor;
-    uploadAndRatioField.backgroundColor = NSColor.textBackgroundColor;
     uploadAndRatioField.lineBreakMode = NSLineBreakByClipping;
     self.fGroupUploadAndRatioField = uploadAndRatioField;
 
@@ -52,7 +50,7 @@
         view.editable = NO;
         view.selectable = NO;
         view.bordered = NO;
-        view.font = [NSFont systemFontOfSize:11.0 weight:NSFontWeightBold];
+        view.font = [NSFont boldSystemFontOfSize:NSFont.smallSystemFontSize];
         view.drawsBackground = NO;
     }
 
@@ -87,27 +85,32 @@
         [self.fGroupDownloadField.widthAnchor constraintGreaterThanOrEqualToConstant:60],
 
         // UploadAndRatioView
-        [self.fGroupDownloadField.trailingAnchor constraintEqualToAnchor:self.fGroupUploadAndRatioView.leadingAnchor],
+        [self.fGroupUploadAndRatioView.leadingAnchor constraintEqualToAnchor:self.fGroupDownloadField.trailingAnchor constant:8],
         [self.fGroupUploadAndRatioView.centerYAnchor constraintEqualToAnchor:self.centerYAnchor],
         [self.fGroupUploadAndRatioView.widthAnchor constraintEqualToConstant:16],
         [self.fGroupUploadAndRatioView.heightAnchor constraintEqualToConstant:16],
 
         // UploadAndRatioField
-        [self.fGroupUploadAndRatioView.trailingAnchor constraintEqualToAnchor:self.fGroupUploadAndRatioField.leadingAnchor],
+        [self.fGroupUploadAndRatioField.leadingAnchor constraintEqualToAnchor:self.fGroupUploadAndRatioView.trailingAnchor],
         [self.fGroupUploadAndRatioField.trailingAnchor constraintEqualToAnchor:self.trailingAnchor constant:-5],
         [self.fGroupUploadAndRatioField.centerYAnchor constraintEqualToAnchor:self.centerYAnchor],
         [self.fGroupUploadAndRatioField.widthAnchor constraintGreaterThanOrEqualToConstant:60],
     ]];
 
-    [self.fGroupDownloadField setContentHuggingPriority:251 forOrientation:NSLayoutConstraintOrientationHorizontal];
-    [self.fGroupUploadAndRatioField setContentHuggingPriority:251 forOrientation:NSLayoutConstraintOrientationHorizontal];
+    [self.fGroupTitleField setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow
+                                                    forOrientation:NSLayoutConstraintOrientationHorizontal];
+
+    [self.fGroupDownloadField setContentHuggingPriority:NSLayoutPriorityDefaultLow + 1
+                                         forOrientation:NSLayoutConstraintOrientationHorizontal];
+    [self.fGroupUploadAndRatioField setContentHuggingPriority:NSLayoutPriorityDefaultLow + 1
+                                               forOrientation:NSLayoutConstraintOrientationHorizontal];
 }
 
 - (void)setBackgroundStyle:(NSBackgroundStyle)backgroundStyle
 {
     [super setBackgroundStyle:backgroundStyle];
 
-    __auto_type isEmphasized = backgroundStyle == NSBackgroundStyleEmphasized;
+    auto isEmphasized = backgroundStyle == NSBackgroundStyleEmphasized;
     self.fGroupTitleField.textColor = isEmphasized ? NSColor.labelColor : NSColor.secondaryLabelColor;
 }
 
