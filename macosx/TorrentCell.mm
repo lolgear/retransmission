@@ -16,6 +16,7 @@
 {
     if (self = [super initWithFrame:frameRect]) {
         [self configureViews];
+        [self configurePriorities];
         [self setupConstraints];
     }
     return self;
@@ -34,7 +35,6 @@
 
     auto torrentTitleField = [[NSTextField alloc] init];
     torrentTitleField.textColor = NSColor.labelColor;
-    torrentTitleField.backgroundColor = NSColor.textBackgroundColor;
     torrentTitleField.font = [NSFont systemFontOfSize:12.0 weight:NSFontWeightRegular];
 
     auto torrentPriorityView = [[NSImageView alloc] init];
@@ -44,12 +44,10 @@
 
     auto torrentProgressField = [[NSTextField alloc] init];
     torrentProgressField.textColor = NSColor.secondaryLabelColor;
-    torrentProgressField.backgroundColor = NSColor.textBackgroundColor;
     torrentProgressField.font = [NSFont systemFontOfSize:10.0 weight:NSFontWeightRegular];
 
     auto torrentStatusField = [[NSTextField alloc] init];
     torrentStatusField.textColor = NSColor.secondaryLabelColor;
-    torrentStatusField.backgroundColor = NSColor.textBackgroundColor;
     torrentStatusField.font = [NSFont systemFontOfSize:10.0 weight:NSFontWeightRegular];
 
     auto torrentProgressBarView = [[NSView alloc] init];
@@ -66,6 +64,7 @@
         textField.selectable = NO;
         textField.bordered = NO;
         textField.drawsBackground = NO;
+        textField.lineBreakMode = NSLineBreakByTruncatingMiddle;
     }
 
     for (NSButton* button in @[ actionButton, controlButton, revealButton ]) {
@@ -102,6 +101,46 @@
     self.fTorrentProgressBarView = torrentProgressBarView;
     self.fControlButton = controlButton;
     self.fRevealButton = revealButton;
+}
+
+- (void)configurePriorities
+{
+    auto groupIndicatorView = self.fGroupIndicatorView;
+    auto iconView = self.fIconView;
+    auto actionButton = self.fActionButton;
+    auto torrentTitleField = self.fTorrentTitleField;
+    auto torrentPriorityView = self.fTorrentPriorityView;
+    auto torrentProgressField = self.fTorrentProgressField;
+    auto torrentStatusField = self.fTorrentStatusField;
+    auto controlButton = self.fControlButton;
+    auto revealButton = self.fRevealButton;
+
+    // left items
+    for (NSView* leftView in @[ groupIndicatorView, iconView ]) {
+        [leftView setContentHuggingPriority:NSLayoutPriorityDefaultLow + 1 forOrientation:NSLayoutConstraintOrientationHorizontal];
+        [leftView setContentHuggingPriority:NSLayoutPriorityDefaultLow + 1 forOrientation:NSLayoutConstraintOrientationVertical];
+    }
+
+    [actionButton setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationVertical];
+
+    /// middle items
+    [torrentTitleField setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+    [torrentTitleField setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationVertical];
+    [torrentPriorityView setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+    [torrentPriorityView setContentHuggingPriority:NSLayoutPriorityDefaultLow + 1 forOrientation:NSLayoutConstraintOrientationVertical];
+
+    for (NSView* middleView in @[ torrentProgressField, torrentStatusField ]) {
+        [middleView setContentHuggingPriority:NSLayoutPriorityDefaultLow + 1 forOrientation:NSLayoutConstraintOrientationHorizontal];
+        [middleView setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationVertical];
+    }
+
+    // right items
+    for (NSView* rightView in @[ controlButton, revealButton ]) {
+        [rightView setContentHuggingPriority:NSLayoutPriorityRequired forOrientation:NSLayoutConstraintOrientationHorizontal];
+        [rightView setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationVertical];
+        [rightView setContentCompressionResistancePriority:NSLayoutPriorityRequired
+                                            forOrientation:NSLayoutConstraintOrientationHorizontal];
+    }
 }
 
 - (void)setupConstraints
@@ -153,7 +192,7 @@
         [torrentStatusField.bottomAnchor constraintEqualToAnchor:self.bottomAnchor constant:-1],
 
         // torrentProgressBarView
-        [torrentProgressBarView.centerYAnchor constraintEqualToAnchor:torrentProgressBarView.centerYAnchor],
+        [torrentProgressBarView.topAnchor constraintEqualToAnchor:torrentProgressField.bottomAnchor constant:1],
         [torrentProgressBarView.heightAnchor constraintEqualToConstant:14],
 
         // controlButton

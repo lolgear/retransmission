@@ -233,8 +233,9 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
             // TODO(lolgear): Remove torrent cell from xib.
             torrentCell = [outlineView makeViewWithIdentifier:@"NewTorrentCell" owner:self];
             if (!torrentCell) {
-                torrentCell = [[TorrentCell alloc] initWithFrame:NSZeroRect];
+                torrentCell = [[TorrentCell alloc] initWithFrame:NSMakeRect(0, 0, NSWidth(outlineView.bounds), self.rowHeight)];
                 torrentCell.identifier = @"NewTorrentCell";
+                [torrentCell layoutSubtreeIfNeeded];
             }
 
             ((TorrentCellControlButton*)torrentCell.fControlButton).torrentCell = torrentCell;
