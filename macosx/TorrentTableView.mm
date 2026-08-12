@@ -28,28 +28,6 @@ static CGFloat const kErrorImageSize = 20.0;
 
 static NSTimeInterval const kToggleProgressSeconds = 0.175;
 
-@interface NSIndexSet (Transmission)
-- (NSIndexSet*)symmetricDifference:(NSIndexSet*)otherSet;
-@end
-
-@implementation NSIndexSet (Transmission)
-
-- (NSIndexSet*)symmetricDifference:(NSIndexSet*)otherSet
-{
-    NSMutableIndexSet* result = [self mutableCopy];
-    [result addIndexes:otherSet];
-
-    [self enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL*) {
-        if ([otherSet containsIndex:idx]) {
-            [result removeIndex:idx];
-        }
-    }];
-
-    return [result copy];
-}
-
-@end
-
 @interface TorrentTableView ()
 
 @property(nonatomic) IBOutlet Controller* fController;
@@ -60,8 +38,6 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
 
 @property(nonatomic) IBOutlet NSMenu* fContextRow;
 @property(nonatomic) IBOutlet NSMenu* fContextNoRow;
-
-@property(nonatomic) NSIndexSet* fSelectedRowIndexes;
 
 @property(nonatomic) CGFloat piecesBarPercent;
 @property(nonatomic) NSAnimation* fPiecesBarAnimation;
