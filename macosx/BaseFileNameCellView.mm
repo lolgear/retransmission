@@ -2,7 +2,6 @@
 // It may be used under the MIT (SPDX: MIT) license.
 // License text can be found in the licenses/ folder.
 
-#include <libtransmission/transmission.h>
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 
 #import "BaseFileNameCellView.h"
@@ -22,7 +21,6 @@ static CGFloat const kPaddingBetweenNameAndFolderStatus = 4.0;
 @property(nonatomic, weak) NSImageView* iconView;
 @property(nonatomic, weak) NSTextField* nameField;
 @property(nonatomic, weak) NSTextField* statusField;
-@property(nonatomic, strong) NSArray<NSLayoutConstraint*>* dynamicConstraints;
 @end
 
 static NSCache<UTType*, NSImage*>* iconCache;
@@ -31,7 +29,9 @@ static NSCache<UTType*, NSImage*>* iconCache;
 
 + (void)initialize
 {
-    iconCache = [[NSCache alloc] init];
+    if (self == [BaseFileNameCellView class]) {
+        iconCache = [[NSCache alloc] init];
+    }
 }
 
 + (NSImage*)cachedIconForUTType:(UTType*)uttype
@@ -93,7 +93,7 @@ static NSCache<UTType*, NSImage*>* iconCache;
 {
 }
 
-- (void)updateImageIfNeeded
+- (void)updateImage
 {
 }
 
@@ -112,7 +112,7 @@ static NSCache<UTType*, NSImage*>* iconCache;
     FileListNode* node = self.node;
 
     // Update icon
-    [self updateImageIfNeeded];
+    [self updateImage];
 
     // Update name
     self.nameField.stringValue = node.name;
@@ -181,16 +181,24 @@ static NSCache<UTType*, NSImage*>* iconCache;
 
 @implementation FileNameCellView
 
-- (void)updateImageIfNeeded
+- (void)updateImage
 {
-    if (self.node.name == nil) {
+    NSString* const name = self.node.name;
+
+    if (name == nil) {
         return;
     }
 
-    auto uttype = [UTType typeWithFilenameExtension:self.node.name.pathExtension];
-    auto image = [self.class cachedIconForUTType:uttype];
+    // typeWithFilenameExtension: returns nil when the name carries no extension
+    // ("README", ".gitignore"), so fall back to the generic item icon.
+    auto uttype = [UTType typeWithFilenameExtension:name.pathExtension] ?: UTTypeItem;
 
-    self.iconView.image = image;
+    // cachedIconForUTType: returns one shared instance per type, so this
+    // compares identity rather than contents.
+    auto image = [self.class cachedIconForUTType:uttype];
+    if (self.iconView.image != image) {
+        self.iconView.image = image;
+    }
 }
 
 - (void)setupConstraints
