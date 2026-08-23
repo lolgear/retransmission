@@ -2,30 +2,33 @@
 // It may be used under the MIT (SPDX: MIT) license.
 // License text can be found in the licenses/ folder.
 
-#if __has_feature(modules)
-@import AppKit;
-#else
-#import <AppKit/AppKit.h>
-#endif
-
 #import "FileListNode.h"
 
 @interface FileListNode () {
   @protected
     uint64_t _size;
-}
-- (instancetype)initWithName:(NSString*)name path:(NSString*)path torrent:(Torrent*)torrent size:(uint64_t)size;
-@end
-
-@interface OnlyFileListNode : FileListNode {
     NSIndexSet* _indexesInternal;
 }
+- (instancetype)initWithName:(NSString*)name
+                        path:(NSString*)path
+                     torrent:(Torrent*)torrent
+                        size:(uint64_t)size
+                     indexes:(NSIndexSet*)indexes;
 @end
 
-@interface OnlyFolderListNode : FileListNode {
-    NSMutableIndexSet* _indexesInternal;
-    NSMutableArray* _childrenInternal;
+@interface FileListFileNode : FileListNode
+- (instancetype)initWithFileName:(NSString*)name
+                            path:(NSString*)path
+                            size:(uint64_t)size
+                           index:(NSUInteger)index
+                         torrent:(Torrent*)torrent;
+@end
+
+@interface FileListFolderNode : FileListNode {
+    NSMutableArray<FileListNode*>* _childrenInternal;
 }
+
+- (instancetype)initWithFolderName:(NSString*)name path:(NSString*)path torrent:(Torrent*)torrent;
 @end
 
 @implementation FileListNode
@@ -37,10 +40,12 @@
 
 - (void)insertChild:(FileListNode*)child
 {
+    [self doesNotRecognizeSelector:_cmd];
 }
 
 - (void)insertIndex:(NSUInteger)index withSize:(uint64_t)size
 {
+    [self doesNotRecognizeSelector:_cmd];
 }
 
 - (id)copyWithZone:(NSZone*)zone
@@ -61,7 +66,7 @@
 
 - (NSIndexSet*)indexes
 {
-    return nil;
+    return _indexesInternal;
 }
 
 - (BOOL)updateFromOldName:(NSString*)oldName toNewName:(NSString*)newName inPath:(NSString*)path
@@ -102,13 +107,18 @@
 
 #pragma mark - Private
 
-- (instancetype)initWithName:(NSString*)name path:(NSString*)path torrent:(Torrent*)torrent size:(uint64_t)size
+- (instancetype)initWithName:(NSString*)name
+                        path:(NSString*)path
+                     torrent:(Torrent*)torrent
+                        size:(uint64_t)size
+                     indexes:(NSIndexSet*)indexes
 {
     if ((self = [super init])) {
         _name = [name copy];
         _path = [path copy];
         _torrent = torrent;
         _size = size;
+        _indexesInternal = indexes;
     }
 
     return self;
@@ -116,7 +126,7 @@
 
 @end
 
-@implementation OnlyFileListNode
+@implementation FileListFileNode
 
 - (instancetype)initWithFileName:(NSString*)name
                             path:(NSString*)path
@@ -124,25 +134,7 @@
                            index:(NSUInteger)index
                          torrent:(Torrent*)torrent
 {
-    if ((self = [super initWithName:name path:path torrent:torrent size:size])) {
-        _indexesInternal = [NSIndexSet indexSetWithIndex:index];
-    }
-    return self;
-}
-
-- (NSIndexSet*)indexes
-{
-    return _indexesInternal;
-}
-
-- (void)insertChild:(FileListNode*)child
-{
-    NSAssert(NO, @"method can only be invoked on folders");
-}
-
-- (void)insertIndex:(NSUInteger)index withSize:(uint64_t)size
-{
-    NSAssert(NO, @"method can only be invoked on folders");
+    return [self initWithName:name path:path torrent:torrent size:size indexes:[NSIndexSet indexSetWithIndex:index]];
 }
 
 - (NSString*)description
@@ -152,12 +144,11 @@
 
 @end
 
-@implementation OnlyFolderListNode
+@implementation FileListFolderNode
 
 - (instancetype)initWithFolderName:(NSString*)name path:(NSString*)path torrent:(Torrent*)torrent
 {
-    if ((self = [super initWithName:name path:path torrent:torrent size:0])) {
-        _indexesInternal = [[NSMutableIndexSet alloc] init];
+    if ((self = [super initWithName:name path:path torrent:torrent size:0 indexes:[[NSMutableIndexSet alloc] init]])) {
         _childrenInternal = [[NSMutableArray alloc] init];
     }
     return self;
@@ -166,11 +157,6 @@
 - (BOOL)isFolder
 {
     return YES;
-}
-
-- (NSIndexSet*)indexes
-{
-    return _indexesInternal;
 }
 
 - (NSMutableArray<FileListNode*>*)children
@@ -185,7 +171,7 @@
 
 - (void)insertIndex:(NSUInteger)index withSize:(uint64_t)size
 {
-    [_indexesInternal addIndex:index];
+    [(NSMutableIndexSet*)_indexesInternal addIndex:index];
     _size += size;
 }
 
@@ -199,7 +185,7 @@
 @implementation FileListNode (Creation)
 + (instancetype)createWithFolderName:(NSString*)name path:(NSString*)path torrent:(Torrent*)torrent
 {
-    return [[OnlyFolderListNode alloc] initWithFolderName:name path:path torrent:torrent];
+    return [[FileListFolderNode alloc] initWithFolderName:name path:path torrent:torrent];
 }
 
 + (instancetype)createWithFileName:(NSString*)name
@@ -208,6 +194,6 @@
                              index:(NSUInteger)index
                            torrent:(Torrent*)torrent
 {
-    return [[OnlyFileListNode alloc] initWithFileName:name path:path size:size index:index torrent:torrent];
+    return [[FileListFileNode alloc] initWithFileName:name path:path size:size index:index torrent:torrent];
 }
 @end
