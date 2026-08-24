@@ -100,6 +100,10 @@
     self.fTorrentProgressBarView = torrentProgressBarView;
     self.fControlButton = controlButton;
     self.fRevealButton = revealButton;
+    
+    actionButton.torrentCell = self;
+    controlButton.torrentCell = self;
+    revealButton.torrentCell = self;
 }
 
 - (void)configurePriorities

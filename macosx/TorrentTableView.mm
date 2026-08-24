@@ -213,10 +213,6 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
                 [torrentCell layoutSubtreeIfNeeded];
             }
 
-            ((TorrentCellControlButton*)torrentCell.fControlButton).torrentCell = torrentCell;
-            ((TorrentCellRevealButton*)torrentCell.fRevealButton).torrentCell = torrentCell;
-            ((TorrentCellActionButton*)torrentCell.fActionButton).torrentCell = torrentCell;
-
             // set torrent icon or error badge
             torrentCell.fIconView.image = error ? [NSImage imageNamed:NSImageNameCaution] : torrent.icon;
 
@@ -247,10 +243,6 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
                 torrentCell.identifier = @"NewTorrentCell";
                 [torrentCell layoutSubtreeIfNeeded];
             }
-
-            ((TorrentCellControlButton*)torrentCell.fControlButton).torrentCell = torrentCell;
-            ((TorrentCellRevealButton*)torrentCell.fRevealButton).torrentCell = torrentCell;
-            ((TorrentCellActionButton*)torrentCell.fActionButton).torrentCell = torrentCell;
 
             torrentCell.fTorrentProgressField.stringValue = torrent.progressString;
 
