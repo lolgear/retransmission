@@ -3,13 +3,16 @@
 // License text can be found in the licenses/ folder.
 
 #import <AppKit/AppKit.h>
-#import "TorrentTableView.h"
 
+@class TorrentTableView;
+@class TorrentCellActionButton;
+@class TorrentCellControlButton;
+@class TorrentCellRevealButton;
 @interface TorrentCell : NSTableCellView
 
-@property(nonatomic) NSButton* fActionButton;
-@property(nonatomic) NSButton* fControlButton;
-@property(nonatomic) NSButton* fRevealButton;
+@property(nonatomic) TorrentCellActionButton* fActionButton;
+@property(nonatomic) TorrentCellControlButton* fControlButton;
+@property(nonatomic) TorrentCellRevealButton* fRevealButton;
 
 @property(nonatomic) NSImageView* fIconView;
 @property(nonatomic) NSImageView* fGroupIndicatorView;

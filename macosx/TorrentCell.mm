@@ -11,6 +11,10 @@
 #import "TorrentCellRevealButton.h"
 
 // Layout Constants
+// Considerations:
+// Suffix _Size -> Size ( width x height )
+// Suffix _Spacing -> Spacing between two elements inside container (most of them are in `self` view (torrent cell)).
+// Suffix _Offset -> Offset to container (spacing between this view border and container border).
 // Leading edge (group, icon, action button)
 static CGFloat const kGroupIndicatorSize = 10.0;
 static CGFloat const kGroupIndicatorToIconSpacing = 3.0;
@@ -19,11 +23,9 @@ static CGFloat const kActionButtonSize = 16.0;
 
 // Middle items (progress bar, title, status labels)
 static CGFloat const kPriorityViewSize = 12.0;
-static CGFloat const kIconToStackView = 16.0;
+static CGFloat const kIconToStackViewSpacing = 16.0;
 static CGFloat const kStackViewTopOffset = 3.0;
-static CGFloat const kStackViewToProgressFieldSpacing = 1.0;
-static CGFloat const kProgressFieldToProgressBarSpacing = 1.0;
-static CGFloat const kProgressBarToStatusFieldSpacing = 1.0;
+static CGFloat const kMiddleVerticalStackSpacing = 1.0;
 static CGFloat const kStatusFieldBottomOffset = -1.0; // inverted for constraints.
 static CGFloat const kProgressBarHeight = 14.0;
 
@@ -220,7 +222,7 @@ static CGFloat const kRevealButtonTrailingOffset = -8.0; // inverted for constra
         [torrentPriorityView.widthAnchor constraintEqualToConstant:kPriorityViewSize],
 
         // stackView
-        [stackView.leadingAnchor constraintEqualToAnchor:iconView.trailingAnchor constant:kIconToStackView],
+        [stackView.leadingAnchor constraintEqualToAnchor:iconView.trailingAnchor constant:kIconToStackViewSpacing],
         [stackView.trailingAnchor constraintLessThanOrEqualToAnchor:torrentProgressBarView.trailingAnchor],
         [stackView.topAnchor constraintEqualToAnchor:self.topAnchor constant:kStackViewTopOffset],
         [stackView.leadingAnchor constraintEqualToAnchor:torrentProgressField.leadingAnchor],
@@ -228,18 +230,16 @@ static CGFloat const kRevealButtonTrailingOffset = -8.0; // inverted for constra
         // torrentProgressField
         [torrentProgressField.leadingAnchor constraintEqualToAnchor:torrentProgressBarView.leadingAnchor],
         [torrentProgressField.trailingAnchor constraintEqualToAnchor:torrentProgressBarView.trailingAnchor],
-        [torrentProgressField.topAnchor constraintEqualToAnchor:stackView.bottomAnchor constant:kStackViewToProgressFieldSpacing],
+        [torrentProgressField.topAnchor constraintEqualToAnchor:stackView.bottomAnchor constant:kMiddleVerticalStackSpacing],
 
         // torrentStatusField
         [torrentStatusField.leadingAnchor constraintEqualToAnchor:torrentProgressBarView.leadingAnchor],
         [torrentStatusField.trailingAnchor constraintEqualToAnchor:torrentProgressBarView.trailingAnchor],
-        [torrentStatusField.topAnchor constraintEqualToAnchor:torrentProgressBarView.bottomAnchor
-                                                     constant:kProgressBarToStatusFieldSpacing],
+        [torrentStatusField.topAnchor constraintEqualToAnchor:torrentProgressBarView.bottomAnchor constant:kMiddleVerticalStackSpacing],
         [torrentStatusField.bottomAnchor constraintEqualToAnchor:self.bottomAnchor constant:kStatusFieldBottomOffset],
 
         // torrentProgressBarView
-        [torrentProgressBarView.topAnchor constraintEqualToAnchor:torrentProgressField.bottomAnchor
-                                                         constant:kProgressFieldToProgressBarSpacing],
+        [torrentProgressBarView.topAnchor constraintEqualToAnchor:torrentProgressField.bottomAnchor constant:kMiddleVerticalStackSpacing],
         [torrentProgressBarView.heightAnchor constraintEqualToConstant:kProgressBarHeight],
 
         // controlButton

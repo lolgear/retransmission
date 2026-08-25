@@ -6,9 +6,15 @@
 #import "ProgressBarView.h"
 #import "ProgressGradients.h"
 #import "TorrentTableView.h"
-#import "Torrent.h"
+#import "TorrentCellControlButton.h"
+#import "TorrentCellActionButton.h"
+#import "TorrentCellRevealButton.h"
 
 // Layout Constants
+// Considerations:
+// Suffix _Size -> Size ( width x height )
+// Suffix _Spacing -> Spacing between two elements inside container (most of them are in `self` view (torrent cell)).
+// Suffix _Offset -> Offset to container (spacing between this view border and container border).
 // Leading edge (group, icon, action button)
 static CGFloat const kGroupIndicatorSize = 6.0;
 static CGFloat const kGroupIndicatorToIconSpacing = 8.0;
@@ -23,8 +29,7 @@ static CGFloat const kProgressBarTrailingOffset = -5.0; // inverted for constrai
 
 // Trailing edge (control button, reveal button, status field)
 static CGFloat const kStackViewToStatusFieldSpacing = 4.0;
-static CGFloat const kStatusFieldTrailingOffset = -3.0; // inverted for constraints.
-static CGFloat const kRevealButtonTrailingOffset = -3.0; // inverted for constraints.
+static CGFloat const kTrailingOffset = -3.0; // inverted for constraints.
 static CGFloat const kButtonSize = 14.0;
 static CGFloat const kButtonsSpacing = 3.0;
 
@@ -129,8 +134,7 @@ static CGFloat const kButtonsSpacing = 3.0;
 
         // torrentStatusField
         [torrentStatusField.leadingAnchor constraintEqualToAnchor:stackView.trailingAnchor constant:kStackViewToStatusFieldSpacing],
-        [torrentStatusField.trailingAnchor constraintEqualToAnchor:torrentProgressBarView.trailingAnchor
-                                                          constant:kStatusFieldTrailingOffset],
+        [torrentStatusField.trailingAnchor constraintEqualToAnchor:torrentProgressBarView.trailingAnchor constant:kTrailingOffset],
         [torrentStatusField.centerYAnchor constraintEqualToAnchor:torrentProgressBarView.centerYAnchor],
 
         // controlButton
@@ -140,7 +144,7 @@ static CGFloat const kButtonsSpacing = 3.0;
 
         // revealButton
         [revealButton.leadingAnchor constraintEqualToAnchor:controlButton.trailingAnchor constant:kButtonsSpacing],
-        [revealButton.trailingAnchor constraintEqualToAnchor:torrentProgressBarView.trailingAnchor constant:kRevealButtonTrailingOffset],
+        [revealButton.trailingAnchor constraintEqualToAnchor:torrentProgressBarView.trailingAnchor constant:kTrailingOffset],
         [revealButton.centerYAnchor constraintEqualToAnchor:controlButton.centerYAnchor],
         [revealButton.widthAnchor constraintEqualToConstant:kButtonSize],
         [revealButton.heightAnchor constraintEqualToConstant:kButtonSize],
