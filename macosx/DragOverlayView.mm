@@ -4,15 +4,12 @@
 
 #import "DragOverlayView.h"
 
-static CGFloat const kPadding = 10.0;
-static CGFloat const kIconWidth = 64.0;
-
 @interface DragOverlayView ()
 
-@property(nonatomic) NSImage* fBadge;
-
-@property(nonatomic, readonly) NSDictionary* fMainLineAttributes;
-@property(nonatomic, readonly) NSDictionary* fSubLineAttributes;
+@property(nonatomic, strong) NSView* badgeContainer;
+@property(nonatomic, strong) NSImageView* iconImageView;
+@property(nonatomic, strong) NSTextField* titleLabel;
+@property(nonatomic, strong) NSTextField* subtitleLabel;
 
 @end
 
@@ -21,81 +18,86 @@ static CGFloat const kIconWidth = 64.0;
 - (instancetype)initWithFrame:(NSRect)frame
 {
     if ((self = [super initWithFrame:frame])) {
-        //create attributes
-        NSShadow* stringShadow = [[NSShadow alloc] init];
-        stringShadow.shadowOffset = NSMakeSize(2.0, -2.0);
-        stringShadow.shadowBlurRadius = 4.0;
+        // 1. Background badge container
+        _badgeContainer = [[NSView alloc] initWithFrame:NSZeroRect];
+        _badgeContainer.translatesAutoresizingMaskIntoConstraints = NO;
+        _badgeContainer.wantsLayer = YES;
+        _badgeContainer.layer.backgroundColor = [NSColor colorWithCalibratedWhite:0.0 alpha:0.75].CGColor;
+        _badgeContainer.layer.cornerRadius = 15.0;
+        [self addSubview:_badgeContainer];
 
-        NSFont *bigFont = [NSFont boldSystemFontOfSize:18.0], *smallFont = [NSFont systemFontOfSize:14.0];
+        // 2. Icon
+        _iconImageView = [[NSImageView alloc] initWithFrame:NSZeroRect];
+        _iconImageView.translatesAutoresizingMaskIntoConstraints = NO;
+        _iconImageView.imageScaling = NSImageScaleProportionallyUpOrDown;
+        [_badgeContainer addSubview:_iconImageView];
 
-        NSMutableParagraphStyle* paragraphStyle = [NSParagraphStyle.defaultParagraphStyle mutableCopy];
-        paragraphStyle.lineBreakMode = NSLineBreakByTruncatingMiddle;
+        // 3. Title
+        _titleLabel = [[NSTextField alloc] initWithFrame:NSZeroRect];
+        _titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
+        _titleLabel.editable = NO;
+        _titleLabel.selectable = NO;
+        _titleLabel.drawsBackground = NO;
+        _titleLabel.bordered = NO;
+        _titleLabel.font = [NSFont boldSystemFontOfSize:18.0];
+        _titleLabel.textColor = NSColor.whiteColor;
+        _titleLabel.lineBreakMode = NSLineBreakByTruncatingMiddle;
+        [_badgeContainer addSubview:_titleLabel];
 
-        _fMainLineAttributes = @{
-            NSForegroundColorAttributeName : NSColor.whiteColor,
-            NSFontAttributeName : bigFont,
-            NSShadowAttributeName : stringShadow,
-            NSParagraphStyleAttributeName : paragraphStyle
-        };
+        // 4. Subtitle
+        _subtitleLabel = [[NSTextField alloc] initWithFrame:NSZeroRect];
+        _subtitleLabel.translatesAutoresizingMaskIntoConstraints = NO;
+        _subtitleLabel.editable = NO;
+        _subtitleLabel.selectable = NO;
+        _subtitleLabel.drawsBackground = NO;
+        _subtitleLabel.bordered = NO;
+        _subtitleLabel.font = [NSFont systemFontOfSize:14.0];
+        _subtitleLabel.textColor = NSColor.whiteColor;
+        _subtitleLabel.lineBreakMode = NSLineBreakByTruncatingMiddle;
+        [_badgeContainer addSubview:_subtitleLabel];
 
-        _fSubLineAttributes = @{
-            NSForegroundColorAttributeName : NSColor.whiteColor,
-            NSFontAttributeName : smallFont,
-            NSShadowAttributeName : stringShadow,
-            NSParagraphStyleAttributeName : paragraphStyle
-        };
+        [self setupConstraints];
     }
     return self;
 }
 
-- (void)setOverlay:(NSImage*)icon mainLine:(NSString*)mainLine subLine:(NSString*)subLine
+- (void)setupConstraints
 {
-    //create badge
-    NSRect const badgeRect = NSMakeRect(0.0, 0.0, 325.0, 84.0);
+    // Activate Auto Layout constraints
+    [NSLayoutConstraint activateConstraints:@[
+        // Center the badgeContainer within DragOverlayView
+        [self.badgeContainer.centerXAnchor constraintEqualToAnchor:self.centerXAnchor],
+        [self.badgeContainer.centerYAnchor constraintEqualToAnchor:self.centerYAnchor],
 
-    self.fBadge = [[NSImage alloc] initWithSize:badgeRect.size];
-    [self.fBadge lockFocus];
+        // Fixed badge dimensions from the original spec
+        [self.badgeContainer.widthAnchor constraintEqualToConstant:325.0],
+        [self.badgeContainer.heightAnchor constraintEqualToConstant:84.0],
 
-    NSBezierPath* bp = [NSBezierPath bezierPathWithRoundedRect:badgeRect xRadius:15.0 yRadius:15.0];
-    [[NSColor colorWithCalibratedWhite:0.0 alpha:0.75] set];
-    [bp fill];
+        // Icon layout constraints (padding: 10.0, size: 64x64, vertically centered)
+        [self.iconImageView.leadingAnchor constraintEqualToAnchor:self.badgeContainer.leadingAnchor constant:10.0],
+        [self.iconImageView.centerYAnchor constraintEqualToAnchor:self.badgeContainer.centerYAnchor],
+        [self.iconImageView.widthAnchor constraintEqualToConstant:64.0],
+        [self.iconImageView.heightAnchor constraintEqualToConstant:64.0],
 
-    //place icon
-    [icon drawInRect:NSMakeRect(kPadding, (NSHeight(badgeRect) - kIconWidth) * 0.5, kIconWidth, kIconWidth) fromRect:NSZeroRect
-           operation:NSCompositingOperationSourceOver
-            fraction:1.0];
+        // Main label layout constraints (spacing from icon: 5.0, padding right: 10.0)
+        [self.titleLabel.leadingAnchor constraintEqualToAnchor:self.iconImageView.trailingAnchor constant:5.0],
+        [self.titleLabel.trailingAnchor constraintEqualToAnchor:self.badgeContainer.trailingAnchor constant:-10.0],
+        // Position the main label slightly above the badge center line
+        [self.titleLabel.bottomAnchor constraintEqualToAnchor:self.badgeContainer.centerYAnchor constant:2.0],
 
-    //place main text
-    NSSize const mainLineSize = [mainLine sizeWithAttributes:self.fMainLineAttributes];
-    NSSize const subLineSize = [subLine sizeWithAttributes:self.fSubLineAttributes];
-
-    NSRect lineRect = NSMakeRect(
-        kPadding + kIconWidth + 5.0,
-        (NSHeight(badgeRect) + (subLineSize.height + 2.0 - mainLineSize.height)) * 0.5,
-        NSWidth(badgeRect) - (kPadding + kIconWidth + 2.0) - kPadding,
-        mainLineSize.height);
-    [mainLine drawInRect:lineRect withAttributes:self.fMainLineAttributes];
-
-    //place sub text
-    lineRect.origin.y -= subLineSize.height + 2.0;
-    lineRect.size.height = subLineSize.height;
-    [subLine drawInRect:lineRect withAttributes:self.fSubLineAttributes];
-
-    [self.fBadge unlockFocus];
-
-    self.needsDisplay = YES;
+        // Sub label layout constraints (aligned horizontally with the main label)
+        [self.subtitleLabel.leadingAnchor constraintEqualToAnchor:self.titleLabel.leadingAnchor],
+        [self.subtitleLabel.trailingAnchor constraintEqualToAnchor:self.titleLabel.trailingAnchor],
+        // Stack the sub label right under the main label with a 2-point gap
+        [self.subtitleLabel.topAnchor constraintEqualToAnchor:self.titleLabel.bottomAnchor constant:2.0]
+    ]];
 }
 
-- (void)drawRect:(NSRect)rect
+- (void)setOverlay:(NSImage*)icon mainLine:(NSString*)mainLine subLine:(NSString*)subLine
 {
-    if (self.fBadge) {
-        NSRect const frame = self.frame;
-        NSSize const imageSize = self.fBadge.size;
-        [self.fBadge drawAtPoint:NSMakePoint((NSWidth(frame) - imageSize.width) * 0.5, (NSHeight(frame) - imageSize.height) * 0.5)
-                        fromRect:NSZeroRect
-                       operation:NSCompositingOperationSourceOver
-                        fraction:1.0];
-    }
+    self.iconImageView.image = icon;
+    self.titleLabel.stringValue = mainLine ?: @"";
+    self.subtitleLabel.stringValue = subLine ?: @"";
 }
 
 @end
