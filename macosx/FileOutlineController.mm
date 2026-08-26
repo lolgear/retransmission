@@ -59,14 +59,34 @@ typedef NS_ENUM(NSUInteger, FilePriorityMenuTag) { //
 
 - (void)setTorrent:(Torrent*)torrent
 {
+    // Save the previous row count to compute the diff for the batch update
+    NSInteger oldRowCount = self.fOutline.numberOfRows;
+
+    // 1. Update the underlying data source
     _torrent = torrent;
-
     [self.fFileList setArray:torrent.fileList ?: @[]];
-
     self.filterText = nil;
 
-    [self.fOutline reloadData];
-    [self.fOutline deselectAll:nil]; //do this after reloading the data #4575
+    // 2. Clear selection before mutating the layout to prevent selection artifacts
+    [self.fOutline deselectAll:nil];
+
+    // 3. Perform a safe batch update to preserve view hierarchy and reuse NSViews
+    [self.fOutline beginUpdates];
+
+    // Remove the old rows from the root (parent: nil)
+    if (oldRowCount > 0) {
+        NSIndexSet* oldIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, oldRowCount)];
+        [self.fOutline removeItemsAtIndexes:oldIndexes inParent:nil withAnimation:NSTableViewAnimationEffectNone];
+    }
+
+    // Insert the new rows. AppKit will re-map existing NSTableCellViews directly into these new indices
+    NSInteger newRowCount = self.fFileList.count;
+    if (newRowCount > 0) {
+        NSIndexSet* newIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, newRowCount)];
+        [self.fOutline insertItemsAtIndexes:newIndexes inParent:nil withAnimation:NSTableViewAnimationEffectNone];
+    }
+
+    [self.fOutline endUpdates];
 }
 
 - (void)setFilterText:(NSString*)text
