@@ -38,22 +38,33 @@
     return self;
 }
 
+- (void)handleIsHovering:(BOOL)isHovering
+{
+    self.image = isHovering ? self.fImage : self.fAlternativeImage;
+}
+
 - (void)mouseEntered:(NSEvent*)event
 {
     [super mouseEntered:event];
 
-    self.image = self.fImage;
+    [self handleIsHovering:YES];
 
-    [self.torrentTableView hoverEventBeganForView:self];
+    BOOL minimal = [self.fDefaults boolForKey:@"SmallView"];
+    if (!minimal) {
+        [self.torrentTableView hoverEventBeganForView:self];
+    }
 }
 
 - (void)mouseExited:(NSEvent*)event
 {
     [super mouseExited:event];
 
-    self.image = self.fAlternativeImage;
+    [self handleIsHovering:NO];
 
-    [self.torrentTableView hoverEventEndedForView:self];
+    BOOL minimal = [self.fDefaults boolForKey:@"SmallView"];
+    if (!minimal) {
+        [self.torrentTableView hoverEventEndedForView:self];
+    }
 }
 
 - (void)mouseDown:(NSEvent*)event
