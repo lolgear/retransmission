@@ -188,7 +188,7 @@ static CGFloat const kButtonsSpacing = 3.0;
     NSRect rect = self.bounds;
 
     NSTrackingAreaOptions options = (NSTrackingMouseEnteredAndExited | NSTrackingActiveInKeyWindow);
-    
+
     // Check if mouse is currently inside the bounds
     NSPoint mouseLocation = [self.window mouseLocationOutsideOfEventStream];
     NSPoint localPoint = [self convertPoint:mouseLocation fromView:nil];
@@ -198,7 +198,7 @@ static CGFloat const kButtonsSpacing = 3.0;
     } else {
         [self handleIsHovering:NO];
     }
-    
+
     self.fTrackingArea = [[NSTrackingArea alloc] initWithRect:rect options:options owner:self userInfo:nil];
     [self addTrackingArea:self.fTrackingArea];
 }

@@ -28,28 +28,15 @@ static CGFloat const kErrorImageSize = 20.0;
 
 static NSTimeInterval const kToggleProgressSeconds = 0.175;
 
-@interface TorrentTableViewHoveringData : NSObject<NSCopying>
+@interface TorrentTableViewHoveringData : NSObject
 @property(nonatomic, nullable, copy) NSNumber* hoveredRow;
 @property(nonatomic, nullable, copy) NSString* statusText;
 @property(nonatomic, readonly) BOOL isHovered;
 @end
 @implementation TorrentTableViewHoveringData
-- (BOOL)isHoveredForRow:(NSInteger)row
-{
-    return self.hoveredRow != nil && self.hoveredRow.integerValue == row;
-}
-
 - (BOOL)isHovered
 {
-    return self.hoveredRow != nil && self.hoveredRow.integerValue != -1;
-}
-
-- (nonnull id)copyWithZone:(nullable NSZone*)zone
-{
-    auto copy = (TorrentTableViewHoveringData*)[[self.class alloc] init];
-    copy.hoveredRow = self.hoveredRow;
-    copy.statusText = self.statusText;
-    return copy;
+    return self.hoveredRow != nil;
 }
 @end
 
@@ -588,6 +575,12 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
     return YES;
 }
 
+- (void)handleIsHoveringForRow:(NSInteger)row statusText:(NSString*)text
+{
+    auto view = (TorrentCell*)[self viewAtColumn:0 row:row makeIfNecessary:NO];
+    view.fTorrentStatusField.stringValue = text;
+}
+
 - (void)hoverEventBeganForView:(id)view
 {
     BOOL minimal = [self.fDefaults boolForKey:@"SmallView"];
@@ -598,8 +591,6 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
 
     NSInteger row = [self rowForView:view];
     Torrent* torrent = [self itemAtRow:row];
-
-    auto previouslyHovered = (TorrentTableViewHoveringData*)[self.hoveringData copy];
 
     NSString* statusString;
     if ([view isKindOfClass:[TorrentCellRevealButton class]]) {
@@ -620,18 +611,17 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
         statusString = NSLocalizedString(@"Change transfer settings", "Torrent Table -> tooltip");
     }
 
+    auto previousHoveredRow = self.hoveringData.hoveredRow;
+
     if (statusString) {
         self.hoveringData.hoveredRow = @(row);
         self.hoveringData.statusText = statusString;
+
+        [self handleIsHoveringForRow:row statusText:statusString];
     }
 
-    if (previouslyHovered.isHovered) {
-        NSMutableIndexSet* indexSet = [[NSMutableIndexSet alloc] init];
-        [indexSet addIndex:previouslyHovered.hoveredRow.integerValue];
-        [indexSet addIndex:row];
-        [self reloadDataForRowIndexes:indexSet columnIndexes:[NSIndexSet indexSetWithIndex:0]];
-    } else {
-        [self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndex:0]];
+    if (previousHoveredRow != nil) {
+        [self handleIsHoveringForRow:previousHoveredRow.integerValue statusText:torrent.statusString];
     }
 }
 
@@ -643,18 +633,15 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
         return;
     }
 
-    NSInteger row = [self rowForView:[view superview]];
+    auto previousHoveredRow = self.hoveringData.hoveredRow;
 
-    auto previouslyHovered = (TorrentTableViewHoveringData*)[self.hoveringData copy];
     self.hoveringData.hoveredRow = nil;
     self.hoveringData.statusText = nil;
-    if (previouslyHovered.isHovered) {
-        NSMutableIndexSet* indexSet = [[NSMutableIndexSet alloc] init];
-        [indexSet addIndex:previouslyHovered.hoveredRow.integerValue];
-        [indexSet addIndex:row];
-        [self reloadDataForRowIndexes:indexSet columnIndexes:[NSIndexSet indexSetWithIndex:0]];
-    } else {
-        [self reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:row] columnIndexes:[NSIndexSet indexSetWithIndex:0]];
+
+    if (previousHoveredRow != nil) {
+        NSInteger row = [self rowForView:view];
+        auto torrent = (Torrent*)[self itemAtRow:row];
+        [self handleIsHoveringForRow:previousHoveredRow.integerValue statusText:torrent.statusString];
     }
 }
 
