@@ -82,12 +82,25 @@
 
 - (void)updateTrackingAreas
 {
+    [super updateTrackingAreas];
+
     if (self.fTrackingArea != nil) {
         [self removeTrackingArea:self.fTrackingArea];
     }
 
-    NSTrackingAreaOptions opts = (NSTrackingMouseEnteredAndExited | NSTrackingActiveAlways);
-    self.fTrackingArea = [[NSTrackingArea alloc] initWithRect:self.bounds options:opts owner:self userInfo:nil];
+    NSTrackingAreaOptions options = (NSTrackingMouseEnteredAndExited | NSTrackingActiveAlways);
+    
+    // Check if mouse is currently inside the bounds
+    NSPoint mouseLocation = [self.window mouseLocationOutsideOfEventStream];
+    NSPoint localPoint = [self convertPoint:mouseLocation fromView:nil];
+    if (NSPointInRect(localPoint, self.bounds)) {
+        options |= NSTrackingAssumeInside;
+        [self handleIsHovering:YES];
+    } else {
+        [self handleIsHovering:NO];
+    }
+    
+    self.fTrackingArea = [[NSTrackingArea alloc] initWithRect:self.bounds options:options owner:self userInfo:nil];
     [self addTrackingArea:self.fTrackingArea];
 }
 
