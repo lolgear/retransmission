@@ -59,8 +59,9 @@ typedef NS_ENUM(NSUInteger, FilePriorityMenuTag) { //
 
 - (void)setTorrent:(Torrent*)torrent
 {
-    // Save the previous row count to compute the diff for the batch update
-    NSInteger oldRowCount = self.fOutline.numberOfRows;
+    
+    // Close all folders.
+    [self.fOutline collapseItem:nil collapseChildren:YES];
 
     // 1. Update the underlying data source
     _torrent = torrent;
@@ -74,15 +75,16 @@ typedef NS_ENUM(NSUInteger, FilePriorityMenuTag) { //
     [self.fOutline beginUpdates];
 
     // Remove the old rows from the root (parent: nil)
-    if (oldRowCount > 0) {
-        NSIndexSet* oldIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, oldRowCount)];
+    NSInteger oldRootCount = self.fOutline.numberOfRows;
+    if (oldRootCount > 0) {
+        auto oldIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, oldRootCount)];
         [self.fOutline removeItemsAtIndexes:oldIndexes inParent:nil withAnimation:NSTableViewAnimationEffectNone];
     }
 
     // Insert the new rows. AppKit will re-map existing NSTableCellViews directly into these new indices
-    NSInteger newRowCount = self.fFileList.count;
+    NSUInteger newRowCount = self.fFileList.count;
     if (newRowCount > 0) {
-        NSIndexSet* newIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, newRowCount)];
+        auto newIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, newRowCount)];
         [self.fOutline insertItemsAtIndexes:newIndexes inParent:nil withAnimation:NSTableViewAnimationEffectNone];
     }
 
