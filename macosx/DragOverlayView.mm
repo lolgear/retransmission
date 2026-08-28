@@ -69,7 +69,7 @@ static CGFloat const kTextStackSpacing = 2.0;
         _subtitleLabel.lineBreakMode = NSLineBreakByTruncatingMiddle;
 
         // 5. Vertical TextStack
-        NSStackView* textStackView = [NSStackView stackViewWithViews:@[_titleLabel, _subtitleLabel]];
+        NSStackView* textStackView = [NSStackView stackViewWithViews:@[ _titleLabel, _subtitleLabel ]];
         textStackView.orientation = NSUserInterfaceLayoutOrientationVertical;
         textStackView.alignment = NSLayoutAttributeLeading;
         textStackView.spacing = kTextStackSpacing;
@@ -78,7 +78,7 @@ static CGFloat const kTextStackSpacing = 2.0;
         [textStackView setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationVertical];
 
         // 6. Horizontal MainStack
-        NSStackView* mainStackView = [NSStackView stackViewWithViews:@[_iconImageView, textStackView]];
+        NSStackView* mainStackView = [NSStackView stackViewWithViews:@[ _iconImageView, textStackView ]];
         mainStackView.translatesAutoresizingMaskIntoConstraints = NO;
         mainStackView.orientation = NSUserInterfaceLayoutOrientationHorizontal;
         mainStackView.alignment = NSLayoutAttributeCenterY;
