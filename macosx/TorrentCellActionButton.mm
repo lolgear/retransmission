@@ -49,10 +49,7 @@
 
     [self handleIsHovering:YES];
 
-    BOOL minimal = [self.fDefaults boolForKey:@"SmallView"];
-    if (!minimal) {
-        [self.torrentTableView hoverEventBeganForView:self];
-    }
+    [self.torrentTableView hoverEventBeganForView:self];
 }
 
 - (void)mouseExited:(NSEvent*)event
@@ -61,10 +58,7 @@
 
     [self handleIsHovering:NO];
 
-    BOOL minimal = [self.fDefaults boolForKey:@"SmallView"];
-    if (!minimal) {
-        [self.torrentTableView hoverEventEndedForView:self];
-    }
+    [self.torrentTableView hoverEventEndedForView:self];
 }
 
 - (void)mouseDown:(NSEvent*)event

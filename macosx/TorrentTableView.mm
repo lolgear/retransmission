@@ -29,15 +29,10 @@ static CGFloat const kErrorImageSize = 20.0;
 static NSTimeInterval const kToggleProgressSeconds = 0.175;
 
 @interface TorrentTableViewHoveringData : NSObject
-@property(nonatomic, nullable, copy) NSNumber* hoveredRow;
+@property(nonatomic, nullable, weak) Torrent* hoveredTorrent;
 @property(nonatomic, nullable, copy) NSString* statusText;
-@property(nonatomic, readonly) BOOL isHovered;
 @end
 @implementation TorrentTableViewHoveringData
-- (BOOL)isHovered
-{
-    return self.hoveredRow != nil;
-}
 @end
 
 @interface TorrentTableView ()
@@ -268,13 +263,8 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
 
             // set torrent status
             NSString* status;
-            if (self.hoveringData.isHovered) {
-                NSInteger row = [self rowForItem:item];
-                NSInteger hoverRow = self.hoveringData.hoveredRow.integerValue;
-
-                if (row == hoverRow) {
-                    status = self.hoveringData.statusText;
-                }
+            if (item == self.hoveringData.hoveredTorrent) {
+                status = self.hoveringData.statusText;
             }
             torrentCell.fTorrentStatusField.stringValue = status ?: torrent.statusString;
         }
@@ -578,34 +568,33 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
 // A row's status field shows the hover tooltip while that row is hovered and the
 // torrent's own status otherwise, matching what outlineView:viewForTableColumn:
 // renders when it builds the cell.
-- (void)updateStatusTextForRow:(NSInteger)row
+- (void)updateStatusTextForTorrent:(nullable Torrent*)torrent
 {
-    if (row < 0 || row >= self.numberOfRows) {
+    NSInteger const row = [self rowForItem:torrent];
+    
+    // if torrent is nil, row will be -1.
+    if (row < 0) {
         return;
     }
-
-    auto torrent = (Torrent*)[self itemAtRow:row];
-
-    if (![torrent isKindOfClass:[Torrent class]]) {
-        return;
-    }
-
-    BOOL const hovered = self.hoveringData.hoveredRow != nil && self.hoveringData.hoveredRow.integerValue == row;
 
     auto cell = (TorrentCell*)[self viewAtColumn:0 row:row makeIfNecessary:NO];
-
-    cell.fTorrentStatusField.stringValue = (hovered ? self.hoveringData.statusText : nil) ?: torrent.statusString;
+    NSString* const hoverText = torrent == self.hoveringData.hoveredTorrent ? self.hoveringData.statusText : nil;
+    cell.fTorrentStatusField.stringValue = hoverText ?: torrent.statusString;
 }
 
 - (void)hoverEventBeganForView:(id)view
 {
     BOOL minimal = [self.fDefaults boolForKey:@"SmallView"];
-
+    NSInteger row = [self rowForView:view];
+    
     if (minimal) {
+        if ([view isKindOfClass:[TorrentCellActionButton class]]) {
+            SmallTorrentCell* smallCell = [self viewAtColumn:0 row:row makeIfNecessary:NO];
+            smallCell.fIconView.hidden = YES;
+        }
         return;
     }
 
-    NSInteger row = [self rowForView:view];
     Torrent* torrent = [self itemAtRow:row];
 
     NSString* statusString;
@@ -627,36 +616,36 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
         statusString = NSLocalizedString(@"Change transfer settings", "Torrent Table -> tooltip");
     }
 
-    auto previousHoveredRow = self.hoveringData.hoveredRow;
+    auto previousHoveredTorrent = self.hoveringData.hoveredTorrent;
 
     if (statusString) {
-        self.hoveringData.hoveredRow = @(row);
+        self.hoveringData.hoveredTorrent = torrent;
         self.hoveringData.statusText = statusString;
     }
 
-    if (previousHoveredRow != nil) {
-        [self updateStatusTextForRow:previousHoveredRow.integerValue];
-    }
-
-    [self updateStatusTextForRow:row];
+    [self updateStatusTextForTorrent:previousHoveredTorrent];
+    [self updateStatusTextForTorrent:torrent];
 }
 
 - (void)hoverEventEndedForView:(id)view
 {
     BOOL minimal = [self.fDefaults boolForKey:@"SmallView"];
-
+    NSInteger row = [self rowForView:view];
+    
     if (minimal) {
+        if ([view isKindOfClass:[TorrentCellActionButton class]]) {
+            SmallTorrentCell* smallCell = [self viewAtColumn:0 row:row makeIfNecessary:NO];
+            smallCell.fIconView.hidden = NO;
+        }
         return;
     }
-
-    auto previousHoveredRow = self.hoveringData.hoveredRow;
-
-    self.hoveringData.hoveredRow = nil;
+    
+    auto previousHoveredTorrent = self.hoveringData.hoveredTorrent;
+    
+    self.hoveringData.hoveredTorrent = nil;
     self.hoveringData.statusText = nil;
-
-    if (previousHoveredRow != nil) {
-        [self updateStatusTextForRow:previousHoveredRow.integerValue];
-    }
+    
+    [self updateStatusTextForTorrent:previousHoveredTorrent];
 }
 
 - (void)toggleGroupRowRatio
