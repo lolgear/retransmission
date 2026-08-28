@@ -10,17 +10,15 @@
 static CGFloat const kBadgeWidth = 325.0;
 static CGFloat const kBadgeHeight = 84.0;
 
+// MainStack
+static CGFloat const kMainStackInset = 10;
+static CGFloat const kMainStackSpacing = 5.0;
+
 // Icon
-static CGFloat const kIconLeadingOffset = 10.0;
 static CGFloat const kIconSize = 64.0;
 
-// Title
-static CGFloat const kIconToTitleSpacing = 5.0;
-static CGFloat const kTitleTrailingOffset = -10.0; // inverted for constraints
-static CGFloat const kTitleBottomOffset = 2.0;
-
-// Subtitle
-static CGFloat const kTitleToSubtitleSpacing = 2.0;
+// TextStack
+static CGFloat const kTextStackSpacing = 2.0;
 
 @interface DragOverlayView ()
 
@@ -46,13 +44,10 @@ static CGFloat const kTitleToSubtitleSpacing = 2.0;
 
         // 2. Icon
         _iconImageView = [[NSImageView alloc] initWithFrame:NSZeroRect];
-        _iconImageView.translatesAutoresizingMaskIntoConstraints = NO;
         _iconImageView.imageScaling = NSImageScaleProportionallyUpOrDown;
-        [_badgeContainer addSubview:_iconImageView];
 
         // 3. Title
         _titleLabel = [[NSTextField alloc] initWithFrame:NSZeroRect];
-        _titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
         _titleLabel.editable = NO;
         _titleLabel.selectable = NO;
         _titleLabel.drawsBackground = NO;
@@ -61,11 +56,9 @@ static CGFloat const kTitleToSubtitleSpacing = 2.0;
         _titleLabel.textColor = NSColor.whiteColor;
         _titleLabel.maximumNumberOfLines = 1;
         _titleLabel.lineBreakMode = NSLineBreakByTruncatingMiddle;
-        [_badgeContainer addSubview:_titleLabel];
 
         // 4. Subtitle
         _subtitleLabel = [[NSTextField alloc] initWithFrame:NSZeroRect];
-        _subtitleLabel.translatesAutoresizingMaskIntoConstraints = NO;
         _subtitleLabel.editable = NO;
         _subtitleLabel.selectable = NO;
         _subtitleLabel.drawsBackground = NO;
@@ -74,43 +67,50 @@ static CGFloat const kTitleToSubtitleSpacing = 2.0;
         _subtitleLabel.textColor = NSColor.whiteColor;
         _subtitleLabel.maximumNumberOfLines = 1;
         _subtitleLabel.lineBreakMode = NSLineBreakByTruncatingMiddle;
-        [_badgeContainer addSubview:_subtitleLabel];
 
-        [self setupConstraints];
+        // 5. Vertical TextStack
+        NSStackView* textStackView = [NSStackView stackViewWithViews:@[_titleLabel, _subtitleLabel]];
+        textStackView.orientation = NSUserInterfaceLayoutOrientationVertical;
+        textStackView.alignment = NSLayoutAttributeLeading;
+        textStackView.spacing = kTextStackSpacing;
+
+        // Prevent the vertical stack from stretching awkwardly in height
+        [textStackView setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationVertical];
+
+        // 6. Horizontal MainStack
+        NSStackView* mainStackView = [NSStackView stackViewWithViews:@[_iconImageView, textStackView]];
+        mainStackView.translatesAutoresizingMaskIntoConstraints = NO;
+        mainStackView.orientation = NSUserInterfaceLayoutOrientationHorizontal;
+        mainStackView.alignment = NSLayoutAttributeCenterY;
+        mainStackView.spacing = kMainStackSpacing;
+
+        // AppKit NSStackView edgeInsets push views INWARD, so we use positive numbers here
+        mainStackView.edgeInsets = NSEdgeInsetsMake(0, kMainStackInset, 0, kMainStackInset);
+
+        [_badgeContainer addSubview:mainStackView];
+
+        // 7. Core Auto Layout constraints
+        [NSLayoutConstraint activateConstraints:@[
+            // Center the badgeContainer inside the DragOverlayView bounds
+            [_badgeContainer.centerXAnchor constraintEqualToAnchor:self.centerXAnchor],
+            [_badgeContainer.centerYAnchor constraintEqualToAnchor:self.centerYAnchor],
+
+            // Explicit dimensions for the badge background
+            [_badgeContainer.widthAnchor constraintEqualToConstant:kBadgeWidth],
+            [_badgeContainer.heightAnchor constraintEqualToConstant:kBadgeHeight],
+
+            // Explicit dimensions for the icon
+            [_iconImageView.widthAnchor constraintEqualToConstant:kIconSize],
+            [_iconImageView.heightAnchor constraintEqualToConstant:kIconSize],
+
+            // Stretch the main stack view to fill the badgeContainer entirely
+            [mainStackView.leadingAnchor constraintEqualToAnchor:_badgeContainer.leadingAnchor],
+            [mainStackView.trailingAnchor constraintEqualToAnchor:_badgeContainer.trailingAnchor],
+            [mainStackView.topAnchor constraintEqualToAnchor:_badgeContainer.topAnchor],
+            [mainStackView.bottomAnchor constraintEqualToAnchor:_badgeContainer.bottomAnchor]
+        ]];
     }
     return self;
-}
-
-- (void)setupConstraints
-{
-    // Activate Auto Layout constraints
-    [NSLayoutConstraint activateConstraints:@[
-        // Center the badgeContainer within DragOverlayView
-        [self.badgeContainer.centerXAnchor constraintEqualToAnchor:self.centerXAnchor],
-        [self.badgeContainer.centerYAnchor constraintEqualToAnchor:self.centerYAnchor],
-
-        // Fixed badge dimensions
-        [self.badgeContainer.widthAnchor constraintEqualToConstant:kBadgeWidth],
-        [self.badgeContainer.heightAnchor constraintEqualToConstant:kBadgeHeight],
-
-        // Icon layout constraints (padding: 10.0, size: 64x64, vertically centered)
-        [self.iconImageView.leadingAnchor constraintEqualToAnchor:self.badgeContainer.leadingAnchor constant:kIconLeadingOffset],
-        [self.iconImageView.centerYAnchor constraintEqualToAnchor:self.badgeContainer.centerYAnchor],
-        [self.iconImageView.widthAnchor constraintEqualToConstant:kIconSize],
-        [self.iconImageView.heightAnchor constraintEqualToConstant:kIconSize],
-
-        // Main label layout constraints (spacing from icon: 5.0, padding right: 10.0)
-        [self.titleLabel.leadingAnchor constraintEqualToAnchor:self.iconImageView.trailingAnchor constant:kIconToTitleSpacing],
-        [self.titleLabel.trailingAnchor constraintEqualToAnchor:self.badgeContainer.trailingAnchor constant:kTitleTrailingOffset],
-        // Position the main label slightly above the badge center line
-        [self.titleLabel.bottomAnchor constraintEqualToAnchor:self.badgeContainer.centerYAnchor constant:kTitleBottomOffset],
-
-        // Sub label layout constraints (aligned horizontally with the main label)
-        [self.subtitleLabel.leadingAnchor constraintEqualToAnchor:self.titleLabel.leadingAnchor],
-        [self.subtitleLabel.trailingAnchor constraintEqualToAnchor:self.titleLabel.trailingAnchor],
-        // Stack the sub label right under the main label with a 2-point gap
-        [self.subtitleLabel.topAnchor constraintEqualToAnchor:self.titleLabel.bottomAnchor constant:kTitleToSubtitleSpacing]
-    ]];
 }
 
 - (void)setOverlay:(NSImage*)icon mainLine:(NSString*)mainLine subLine:(NSString*)subLine
