@@ -571,7 +571,7 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
 - (void)updateStatusTextForTorrent:(nullable Torrent*)torrent
 {
     NSInteger const row = [self rowForItem:torrent];
-    
+
     // if torrent is nil, row will be -1.
     if (row < 0) {
         return;
@@ -586,7 +586,7 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
 {
     BOOL minimal = [self.fDefaults boolForKey:@"SmallView"];
     NSInteger row = [self rowForView:view];
-    
+
     if (minimal) {
         if ([view isKindOfClass:[TorrentCellActionButton class]]) {
             SmallTorrentCell* smallCell = [self viewAtColumn:0 row:row makeIfNecessary:NO];
@@ -631,7 +631,7 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
 {
     BOOL minimal = [self.fDefaults boolForKey:@"SmallView"];
     NSInteger row = [self rowForView:view];
-    
+
     if (minimal) {
         if ([view isKindOfClass:[TorrentCellActionButton class]]) {
             SmallTorrentCell* smallCell = [self viewAtColumn:0 row:row makeIfNecessary:NO];
@@ -639,12 +639,12 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
         }
         return;
     }
-    
+
     auto previousHoveredTorrent = self.hoveringData.hoveredTorrent;
-    
+
     self.hoveringData.hoveredTorrent = nil;
     self.hoveringData.statusText = nil;
-    
+
     [self updateStatusTextForTorrent:previousHoveredTorrent];
 }
 
