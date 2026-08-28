@@ -4,12 +4,30 @@
 
 #import "DragOverlayView.h"
 
+// Layout
+
+// Badge
+static CGFloat const kBadgeWidth = 325.0;
+static CGFloat const kBadgeHeight = 84.0;
+
+// Icon
+static CGFloat const kIconLeadingOffset = 10.0;
+static CGFloat const kIconSize = 64.0;
+
+// Title
+static CGFloat const kIconToTitleSpacing = 5.0;
+static CGFloat const kTitleTrailingOffset = -10.0; // inverted for constraints
+static CGFloat const kTitleBottomOffset = 2.0;
+
+// Subtitle
+static CGFloat const kTitleToSubtitleSpacing = 2.0;
+
 @interface DragOverlayView ()
 
-@property(nonatomic, strong) NSView* badgeContainer;
-@property(nonatomic, strong) NSImageView* iconImageView;
-@property(nonatomic, strong) NSTextField* titleLabel;
-@property(nonatomic, strong) NSTextField* subtitleLabel;
+@property(nonatomic, readonly) NSView* badgeContainer;
+@property(nonatomic, readonly) NSImageView* iconImageView;
+@property(nonatomic, readonly) NSTextField* titleLabel;
+@property(nonatomic, readonly) NSTextField* subtitleLabel;
 
 @end
 
@@ -41,6 +59,7 @@
         _titleLabel.bordered = NO;
         _titleLabel.font = [NSFont boldSystemFontOfSize:18.0];
         _titleLabel.textColor = NSColor.whiteColor;
+        _titleLabel.maximumNumberOfLines = 1;
         _titleLabel.lineBreakMode = NSLineBreakByTruncatingMiddle;
         [_badgeContainer addSubview:_titleLabel];
 
@@ -53,6 +72,7 @@
         _subtitleLabel.bordered = NO;
         _subtitleLabel.font = [NSFont systemFontOfSize:14.0];
         _subtitleLabel.textColor = NSColor.whiteColor;
+        _subtitleLabel.maximumNumberOfLines = 1;
         _subtitleLabel.lineBreakMode = NSLineBreakByTruncatingMiddle;
         [_badgeContainer addSubview:_subtitleLabel];
 
@@ -69,27 +89,27 @@
         [self.badgeContainer.centerXAnchor constraintEqualToAnchor:self.centerXAnchor],
         [self.badgeContainer.centerYAnchor constraintEqualToAnchor:self.centerYAnchor],
 
-        // Fixed badge dimensions from the original spec
-        [self.badgeContainer.widthAnchor constraintEqualToConstant:325.0],
-        [self.badgeContainer.heightAnchor constraintEqualToConstant:84.0],
+        // Fixed badge dimensions
+        [self.badgeContainer.widthAnchor constraintEqualToConstant:kBadgeWidth],
+        [self.badgeContainer.heightAnchor constraintEqualToConstant:kBadgeHeight],
 
         // Icon layout constraints (padding: 10.0, size: 64x64, vertically centered)
-        [self.iconImageView.leadingAnchor constraintEqualToAnchor:self.badgeContainer.leadingAnchor constant:10.0],
+        [self.iconImageView.leadingAnchor constraintEqualToAnchor:self.badgeContainer.leadingAnchor constant:kIconLeadingOffset],
         [self.iconImageView.centerYAnchor constraintEqualToAnchor:self.badgeContainer.centerYAnchor],
-        [self.iconImageView.widthAnchor constraintEqualToConstant:64.0],
-        [self.iconImageView.heightAnchor constraintEqualToConstant:64.0],
+        [self.iconImageView.widthAnchor constraintEqualToConstant:kIconSize],
+        [self.iconImageView.heightAnchor constraintEqualToConstant:kIconSize],
 
         // Main label layout constraints (spacing from icon: 5.0, padding right: 10.0)
-        [self.titleLabel.leadingAnchor constraintEqualToAnchor:self.iconImageView.trailingAnchor constant:5.0],
-        [self.titleLabel.trailingAnchor constraintEqualToAnchor:self.badgeContainer.trailingAnchor constant:-10.0],
+        [self.titleLabel.leadingAnchor constraintEqualToAnchor:self.iconImageView.trailingAnchor constant:kIconToTitleSpacing],
+        [self.titleLabel.trailingAnchor constraintEqualToAnchor:self.badgeContainer.trailingAnchor constant:kTitleTrailingOffset],
         // Position the main label slightly above the badge center line
-        [self.titleLabel.bottomAnchor constraintEqualToAnchor:self.badgeContainer.centerYAnchor constant:2.0],
+        [self.titleLabel.bottomAnchor constraintEqualToAnchor:self.badgeContainer.centerYAnchor constant:kTitleBottomOffset],
 
         // Sub label layout constraints (aligned horizontally with the main label)
         [self.subtitleLabel.leadingAnchor constraintEqualToAnchor:self.titleLabel.leadingAnchor],
         [self.subtitleLabel.trailingAnchor constraintEqualToAnchor:self.titleLabel.trailingAnchor],
         // Stack the sub label right under the main label with a 2-point gap
-        [self.subtitleLabel.topAnchor constraintEqualToAnchor:self.titleLabel.bottomAnchor constant:2.0]
+        [self.subtitleLabel.topAnchor constraintEqualToAnchor:self.titleLabel.bottomAnchor constant:kTitleToSubtitleSpacing]
     ]];
 }
 
