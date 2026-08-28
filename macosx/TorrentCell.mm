@@ -271,12 +271,14 @@ static CGFloat const kRevealButtonTrailingOffset = -8.0; // inverted for constra
     [super drawRect:dirtyRect];
 }
 
-- (void)setObjectValue:(id)objectValue {
+- (void)setObjectValue:(id)objectValue
+{
     [super setObjectValue:objectValue];
     [self setTorrentPriority:[(Torrent*)objectValue priority]];
 }
 
-- (void)setTorrentPriority:(tr_priority_t)priority {    
+- (void)setTorrentPriority:(tr_priority_t)priority
+{
     if (priority != TR_PRI_NORMAL) {
         NSImage* priorityImage = [NSImage imageNamed:(priority == TR_PRI_HIGH ? @"PriorityHighTemplate" : @"PriorityLowTemplate")];
 
