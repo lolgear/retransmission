@@ -575,10 +575,26 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
     return YES;
 }
 
-- (void)handleIsHoveringForRow:(NSInteger)row statusText:(NSString*)text
+// A row's status field shows the hover tooltip while that row is hovered and the
+// torrent's own status otherwise, matching what outlineView:viewForTableColumn:
+// renders when it builds the cell.
+- (void)updateStatusTextForRow:(NSInteger)row
 {
-    auto view = (TorrentCell*)[self viewAtColumn:0 row:row makeIfNecessary:NO];
-    view.fTorrentStatusField.stringValue = text;
+    if (row < 0 || row >= self.numberOfRows) {
+        return;
+    }
+
+    auto torrent = (Torrent*)[self itemAtRow:row];
+
+    if (![torrent isKindOfClass:[Torrent class]]) {
+        return;
+    }
+
+    BOOL const hovered = self.hoveringData.hoveredRow != nil && self.hoveringData.hoveredRow.integerValue == row;
+
+    auto cell = (TorrentCell*)[self viewAtColumn:0 row:row makeIfNecessary:NO];
+
+    cell.fTorrentStatusField.stringValue = (hovered ? self.hoveringData.statusText : nil) ?: torrent.statusString;
 }
 
 - (void)hoverEventBeganForView:(id)view
@@ -616,13 +632,13 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
     if (statusString) {
         self.hoveringData.hoveredRow = @(row);
         self.hoveringData.statusText = statusString;
-
-        [self handleIsHoveringForRow:row statusText:statusString];
     }
 
     if (previousHoveredRow != nil) {
-        [self handleIsHoveringForRow:previousHoveredRow.integerValue statusText:torrent.statusString];
+        [self updateStatusTextForRow:previousHoveredRow.integerValue];
     }
+
+    [self updateStatusTextForRow:row];
 }
 
 - (void)hoverEventEndedForView:(id)view
@@ -639,9 +655,7 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
     self.hoveringData.statusText = nil;
 
     if (previousHoveredRow != nil) {
-        NSInteger row = [self rowForView:view];
-        auto torrent = (Torrent*)[self itemAtRow:row];
-        [self handleIsHoveringForRow:previousHoveredRow.integerValue statusText:torrent.statusString];
+        [self updateStatusTextForRow:previousHoveredRow.integerValue];
     }
 }
 
