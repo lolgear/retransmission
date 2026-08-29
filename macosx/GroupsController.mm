@@ -13,8 +13,8 @@ static CGFloat const kIconWidthSmall = 12.0;
 @interface TRGroup : NSObject<NSSecureCoding>
 
 @property(nonatomic, assign) NSInteger groupIndex;
-@property(nonatomic, copy) NSString* name;
-@property(nonatomic, strong) NSColor* color;
+@property(nonatomic, copy, null_resettable) NSString* name;
+@property(nonatomic, strong, null_resettable) NSColor* color;
 
 /** Runtime-only cache for the rendered group icon. Ignored during serialization. */
 @property(nonatomic, strong, nullable) NSImage* icon;
@@ -31,6 +31,16 @@ static CGFloat const kIconWidthSmall = 12.0;
 
 @implementation TRGroup
 
+- (void)setName:(nullable NSString*)name
+{
+    _name = name ? [name copy] : @"";
+}
+
+- (void)setColor:(nullable NSColor*)color
+{
+    _color = color ?: NSColor.systemGrayColor;
+}
+
 + (BOOL)supportsSecureCoding
 {
     return YES;
@@ -38,11 +48,10 @@ static CGFloat const kIconWidthSmall = 12.0;
 
 - (instancetype)initWithIndex:(NSInteger)index name:(nullable NSString*)name color:(nullable NSColor*)color
 {
-    self = [super init];
-    if (self) {
+    if ((self = [super init])) {
         _groupIndex = index;
-        _name = [name copy] ?: @"";
-        _color = color ?: NSColor.systemGrayColor;
+        self.name = name;
+        self.color = color;
     }
     return self;
 }
@@ -62,11 +71,11 @@ static CGFloat const kIconWidthSmall = 12.0;
 
 - (instancetype)initWithCoder:(NSCoder*)coder
 {
-    self = [super init];
-    if (self) {
-        _groupIndex = [coder decodeIntegerForKey:@"Index"];
-        _name = [coder decodeObjectOfClass:NSString.class forKey:@"Name"] ?: @"";
-        _color = [coder decodeObjectOfClass:NSColor.class forKey:@"Color"] ?: NSColor.systemGrayColor;
+    auto groupIndex = [coder decodeIntegerForKey:@"Index"];
+    auto name = (NSString*)[coder decodeObjectOfClass:NSString.class forKey:@"Name"];
+    auto color = (NSColor*)[coder decodeObjectOfClass:NSColor.class forKey:@"Color"];
+
+    if ((self = [self initWithIndex:groupIndex name:name color:color])) {
         _usesCustomDownloadLocation = [coder decodeBoolForKey:@"UsesCustomDownloadLocation"];
         _customDownloadLocation = [coder decodeObjectOfClass:NSString.class forKey:@"CustomDownloadLocation"];
         _usesAutoGroupRules = [coder decodeBoolForKey:@"UsesAutoGroupRules"];
@@ -244,7 +253,7 @@ static CGFloat const kIconWidthSmall = 12.0;
         return;
     }
 
-    group.name = name ?: @"";
+    group.name = name;
     [self saveGroupsAndNotify];
 }
 
@@ -262,7 +271,7 @@ static CGFloat const kIconWidthSmall = 12.0;
     }
 
     group.icon = nil; // Invalidate cached icon to force re-render with the new color
-    group.color = color ?: NSColor.systemGrayColor;
+    group.color = color;
     [self saveGroupsAndNotify];
 }
 
@@ -417,11 +426,15 @@ static CGFloat const kIconWidthSmall = 12.0;
             item.image = icon;
         }
         [menu addItem:item];
-    }; // Add the default placeholder item "None" (-1)
-    addItemWithTitleTagIcon(NSLocalizedString(@"None", "Groups -> Menu"), -1, [self imageForGroupNone]); // Populate menu items using the clean object properties
+    };
+
+    // Add the default placeholder item "None" (-1)
+    addItemWithTitleTagIcon(NSLocalizedString(@"None", "Groups -> Menu"), -1, [self imageForGroupNone]);
+
     for (TRGroup* group in self.fGroups) {
         addItemWithTitleTagIcon(group.name, group.groupIndex, [self imageForGroup:group]);
     }
+
     return menu;
 }
 
