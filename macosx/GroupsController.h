@@ -15,32 +15,32 @@
 - (NSInteger)rowValueForIndex:(NSInteger)index;
 - (NSInteger)indexForRow:(NSInteger)row;
 
-- (NSString*)nameForIndex:(NSInteger)index;
+- (nullable NSString*)nameForIndex:(NSInteger)index;
 - (void)setName:(NSString*)name forIndex:(NSInteger)index;
 
-- (NSImage*)imageForIndex:(NSInteger)index;
+- (nonnull NSImage*)imageForIndex:(NSInteger)index;
 
-- (NSColor*)colorForIndex:(NSInteger)index;
-- (void)setColor:(NSColor*)color forIndex:(NSInteger)index;
+- (nullable NSColor*)colorForIndex:(NSInteger)index;
+- (void)setColor:(nullable NSColor*)color forIndex:(NSInteger)index;
 
 - (BOOL)usesCustomDownloadLocationForIndex:(NSInteger)index;
 - (void)setUsesCustomDownloadLocation:(BOOL)useCustomLocation forIndex:(NSInteger)index;
 
-- (NSString*)customDownloadLocationForIndex:(NSInteger)index;
-- (void)setCustomDownloadLocation:(NSString*)location forIndex:(NSInteger)index;
+- (nullable NSString*)customDownloadLocationForIndex:(NSInteger)index;
+- (void)setCustomDownloadLocation:(nullable NSString*)location forIndex:(NSInteger)index;
 
 - (BOOL)usesAutoAssignRulesForIndex:(NSInteger)index;
 - (void)setUsesAutoAssignRules:(BOOL)useAutoAssignRules forIndex:(NSInteger)index;
 
-- (NSPredicate*)autoAssignRulesForIndex:(NSInteger)index;
-- (void)setAutoAssignRules:(NSPredicate*)predicate forIndex:(NSInteger)index;
+- (nullable NSPredicate*)autoAssignRulesForIndex:(NSInteger)index;
+- (void)setAutoAssignRules:(nullable NSPredicate*)predicate forIndex:(NSInteger)index;
 
 - (void)addNewGroup;
 - (void)removeGroupWithRowIndex:(NSInteger)row;
 
 - (void)moveGroupAtRow:(NSInteger)oldRow toRow:(NSInteger)newRow;
 
-- (NSMenu*)groupMenuWithTarget:(id)target action:(SEL)action isSmall:(BOOL)small;
+- (nonnull NSMenu*)groupMenuWithTarget:(id)target action:(SEL)action isSmall:(BOOL)small;
 
 - (NSInteger)groupIndexForTorrent:(Torrent*)torrent;
 @end

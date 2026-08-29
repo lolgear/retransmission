@@ -4,7 +4,6 @@
 
 #import "GroupsController.h"
 #import "NSImageAdditions.h"
-#import "NSKeyedUnarchiverAdditions.h"
 #import "NSMutableArrayAdditions.h"
 
 static CGFloat const kIconWidth = 16.0;
@@ -86,10 +85,16 @@ static CGFloat const kIconWidthSmall = 12.0;
 /** Fast lookup map (Group ID -> Array Index) providing O(1) row queries. */
 @property(nonatomic, strong) NSMutableDictionary<NSNumber*, NSNumber*>* fIndexMap;
 
-- (NSImage*)imageForGroupNone;
-- (NSImage*)imageForGroup:(TRGroup*)group;
-- (BOOL)torrent:(Torrent*)torrent doesMatchRulesForGroupAtIndex:(NSInteger)index;
+- (nullable TRGroup*)groupForIndex:(NSInteger)index;
 - (void)rebuildIndexMap;
+
+- (void)saveGroups;
+- (void)saveGroupsAndNotify;
+
+- (BOOL)torrent:(Torrent*)torrent doesMatchRulesForGroup:(TRGroup*)group;
+
+- (nonnull NSImage*)imageForGroupNone;
+- (nonnull NSImage*)imageForGroup:(TRGroup*)group;
 
 @end
 
@@ -129,34 +134,39 @@ static CGFloat const kIconWidthSmall = 12.0;
                                                                                                    nil]
                                                                     fromData:data
                                                                        error:nil];
-            _fGroups = [[NSMutableArray alloc] init];
-            for (NSDictionary* dict in oldDicts) {
-                TRGroup* g = [[TRGroup alloc] initWithIndex:[dict[@"Index"] integerValue] name:dict[@"Name"] color:dict[@"Color"]];
-                g.usesCustomDownloadLocation = [dict[@"UsesCustomDownloadLocation"] boolValue];
-                g.customDownloadLocation = dict[@"CustomDownloadLocation"];
-                g.usesAutoGroupRules = [dict[@"UsesAutoGroupRules"] boolValue];
-                g.autoGroupRules = dict[@"AutoGroupRules"];
-                [_fGroups addObject:g];
+            if (oldDicts != nil) {
+                _fGroups = [[NSMutableArray alloc] init];
+                for (NSDictionary* dict in oldDicts) {
+                    TRGroup* g = [[TRGroup alloc] initWithIndex:[dict[@"Index"] integerValue] name:dict[@"Name"]
+                                                          color:dict[@"Color"]];
+                    g.usesCustomDownloadLocation = [dict[@"UsesCustomDownloadLocation"] boolValue];
+                    g.customDownloadLocation = dict[@"CustomDownloadLocation"];
+                    g.usesAutoGroupRules = [dict[@"UsesAutoGroupRules"] boolValue];
+                    g.autoGroupRules = dict[@"AutoGroupRules"];
+                    [_fGroups addObject:g];
+                }
+                [self saveGroups];
             }
-            [self saveGroups];
+
+            [NSUserDefaults.standardUserDefaults removeObjectForKey:@"GroupDicts"];
         }
 
         // 3. Fallback: Initialize with default color-coded groups if no saved data exists
         if (_fGroups == nil) {
             _fGroups = [[NSMutableArray alloc]
-                initWithObjects:[[TRGroup alloc] initWithIndex:0 name:NSLocalizedString(@"Red", @"Groups -> Name")
+                initWithObjects:[[TRGroup alloc] initWithIndex:0 name:NSLocalizedString(@"Red", "Groups -> Name")
                                                          color:NSColor.systemRedColor],
-                                [[TRGroup alloc] initWithIndex:1 name:NSLocalizedString(@"Orange", @"Groups -> Name")
+                                [[TRGroup alloc] initWithIndex:1 name:NSLocalizedString(@"Orange", "Groups -> Name")
                                                          color:NSColor.systemOrangeColor],
-                                [[TRGroup alloc] initWithIndex:2 name:NSLocalizedString(@"Yellow", @"Groups -> Name")
+                                [[TRGroup alloc] initWithIndex:2 name:NSLocalizedString(@"Yellow", "Groups -> Name")
                                                          color:NSColor.systemYellowColor],
-                                [[TRGroup alloc] initWithIndex:3 name:NSLocalizedString(@"Green", @"Groups -> Name")
+                                [[TRGroup alloc] initWithIndex:3 name:NSLocalizedString(@"Green", "Groups -> Name")
                                                          color:NSColor.systemGreenColor],
-                                [[TRGroup alloc] initWithIndex:4 name:NSLocalizedString(@"Blue", @"Groups -> Name")
+                                [[TRGroup alloc] initWithIndex:4 name:NSLocalizedString(@"Blue", "Groups -> Name")
                                                          color:NSColor.systemBlueColor],
-                                [[TRGroup alloc] initWithIndex:5 name:NSLocalizedString(@"Purple", @"Groups -> Name")
+                                [[TRGroup alloc] initWithIndex:5 name:NSLocalizedString(@"Purple", "Groups -> Name")
                                                          color:NSColor.systemPurpleColor],
-                                [[TRGroup alloc] initWithIndex:6 name:NSLocalizedString(@"Gray", @"Groups -> Name")
+                                [[TRGroup alloc] initWithIndex:6 name:NSLocalizedString(@"Gray", "Groups -> Name")
                                                          color:NSColor.systemGrayColor],
                                 nil];
             [self saveGroups];
@@ -188,6 +198,12 @@ static CGFloat const kIconWidthSmall = 12.0;
     }
 }
 
+- (void)saveGroupsAndNotify
+{
+    [NSNotificationCenter.defaultCenter postNotificationName:@"UpdateGroups" object:self];
+    [self saveGroups];
+}
+
 #pragma mark - Data Accessors
 
 - (NSInteger)numberOfGroups
@@ -209,38 +225,45 @@ static CGFloat const kIconWidthSmall = 12.0;
     return self.fGroups[row].groupIndex;
 }
 
-- (NSString*)nameForIndex:(NSInteger)index
+- (nullable TRGroup*)groupForIndex:(NSInteger)index
 {
     NSInteger orderIndex = [self rowValueForIndex:index];
-    return orderIndex != -1 ? self.fGroups[orderIndex].name : nil;
+    return orderIndex != -1 ? self.fGroups[orderIndex] : nil;
+}
+
+- (NSString*)nameForIndex:(NSInteger)index
+{
+    return [self groupForIndex:index].name;
 }
 
 - (void)setName:(NSString*)name forIndex:(NSInteger)index
 {
-    NSInteger orderIndex = [self rowValueForIndex:index];
-    if (orderIndex != -1) {
-        self.fGroups[orderIndex].name = name;
-        [self saveGroups];
-        [NSNotificationCenter.defaultCenter postNotificationName:@"UpdateGroups" object:self];
+    TRGroup* group = [self groupForIndex:index];
+
+    if (group == nil) {
+        return;
     }
+
+    group.name = name;
+    [self saveGroupsAndNotify];
 }
 
 - (NSColor*)colorForIndex:(NSInteger)index
 {
-    NSInteger orderIndex = [self rowValueForIndex:index];
-    return orderIndex != -1 ? self.fGroups[orderIndex].color : nil;
+    return [self groupForIndex:index].color;
 }
 
 - (void)setColor:(NSColor*)color forIndex:(NSInteger)index
 {
-    NSInteger orderIndex = [self rowValueForIndex:index];
-    if (orderIndex != -1) {
-        TRGroup* group = self.fGroups[orderIndex];
-        group.icon = nil; // Invalidate cached icon to force re-render with the new color
-        group.color = color;
-        [self saveGroups];
-        [NSNotificationCenter.defaultCenter postNotificationName:@"UpdateGroups" object:self];
+    TRGroup* group = [self groupForIndex:index];
+
+    if (group == nil) {
+        return;
     }
+
+    group.icon = nil; // Invalidate cached icon to force re-render with the new color
+    group.color = color;
+    [self saveGroupsAndNotify];
 }
 
 #pragma mark - Download Location Management
@@ -249,69 +272,77 @@ static CGFloat const kIconWidthSmall = 12.0;
 {
     if (![self customDownloadLocationForIndex:index])
         return NO;
-    NSInteger orderIndex = [self rowValueForIndex:index];
-    return orderIndex != -1 ? self.fGroups[orderIndex].usesCustomDownloadLocation : NO;
+
+    return [self groupForIndex:index].usesCustomDownloadLocation;
 }
 
 - (void)setUsesCustomDownloadLocation:(BOOL)useCustomLocation forIndex:(NSInteger)index
 {
-    NSInteger orderIndex = [self rowValueForIndex:index];
-    if (orderIndex != -1) {
-        self.fGroups[orderIndex].usesCustomDownloadLocation = useCustomLocation;
-        [self saveGroups];
+    TRGroup* group = [self groupForIndex:index];
+
+    if (group == nil) {
+        return;
     }
+
+    group.usesCustomDownloadLocation = useCustomLocation;
+    [self saveGroups];
 }
 
 - (NSString*)customDownloadLocationForIndex:(NSInteger)index
 {
-    NSInteger orderIndex = [self rowValueForIndex:index];
-    return orderIndex != -1 ? self.fGroups[orderIndex].customDownloadLocation : nil;
+    return [self groupForIndex:index].customDownloadLocation;
 }
 
 - (void)setCustomDownloadLocation:(NSString*)location forIndex:(NSInteger)index
 {
-    NSInteger orderIndex = [self rowValueForIndex:index];
-    if (orderIndex != -1) {
-        self.fGroups[orderIndex].customDownloadLocation = location;
-        [self saveGroups];
+    TRGroup* group = [self groupForIndex:index];
+
+    if (group == nil) {
+        return;
     }
+
+    group.customDownloadLocation = location;
+    [self saveGroups];
 }
 
 #pragma mark - Smart Rules (NSPredicate Matching)
 
 - (BOOL)usesAutoAssignRulesForIndex:(NSInteger)index
 {
-    NSInteger orderIndex = [self rowValueForIndex:index];
-    return orderIndex != -1 ? self.fGroups[orderIndex].usesAutoGroupRules : NO;
+    return [self groupForIndex:index].usesAutoGroupRules;
 }
 
 - (void)setUsesAutoAssignRules:(BOOL)useAutoAssignRules forIndex:(NSInteger)index
 {
-    NSInteger orderIndex = [self rowValueForIndex:index];
-    if (orderIndex != -1) {
-        self.fGroups[orderIndex].usesAutoGroupRules = useAutoAssignRules;
-        [self saveGroups];
+    TRGroup* group = [self groupForIndex:index];
+
+    if (group == nil) {
+        return;
     }
+
+    group.usesAutoGroupRules = useAutoAssignRules;
+    [self saveGroups];
 }
 
 - (NSPredicate*)autoAssignRulesForIndex:(NSInteger)index
 {
-    NSInteger orderIndex = [self rowValueForIndex:index];
-    return orderIndex != -1 ? self.fGroups[orderIndex].autoGroupRules : nil;
+    return [self groupForIndex:index].autoGroupRules;
 }
 
 - (void)setAutoAssignRules:(NSPredicate*)predicate forIndex:(NSInteger)index
 {
-    NSInteger orderIndex = [self rowValueForIndex:index];
-    if (orderIndex != -1) {
-        TRGroup* group = self.fGroups[orderIndex];
-        if (predicate) {
-            group.autoGroupRules = predicate;
-            [self saveGroups];
-        } else {
-            group.autoGroupRules = nil;
-            [self setUsesAutoAssignRules:NO forIndex:index];
-        }
+    TRGroup* group = [self groupForIndex:index];
+
+    if (group == nil) {
+        return;
+    }
+
+    if (predicate != nil) {
+        group.autoGroupRules = predicate;
+        [self saveGroups];
+    } else {
+        group.autoGroupRules = nil;
+        [self setUsesAutoAssignRules:NO forIndex:index];
     }
 }
 
@@ -332,37 +363,41 @@ static CGFloat const kIconWidthSmall = 12.0;
     [self.fGroups addObject:newGroup];
 
     [self rebuildIndexMap];
-    [NSNotificationCenter.defaultCenter postNotificationName:@"UpdateGroups" object:self];
-    [self saveGroups];
+
+    [self saveGroupsAndNotify];
 }
 
 - (void)removeGroupWithRowIndex:(NSInteger)row
 {
-    if (row < 0 || row >= self.fGroups.count)
+    if (row < 0 || row >= self.fGroups.count) {
         return;
+    }
 
     NSInteger index = self.fGroups[row].groupIndex;
     [self.fGroups removeObjectAtIndex:row];
     [self rebuildIndexMap];
 
     [NSNotificationCenter.defaultCenter postNotificationName:@"GroupValueRemoved" object:self
-
                                                     userInfo:@{ @"Index" : @(index) }];
+
     // Reset UI group filter if the currently filtered group was deleted
     if (index == [NSUserDefaults.standardUserDefaults integerForKey:@"FilterGroup"]) {
         [NSUserDefaults.standardUserDefaults setInteger:-2 forKey:@"FilterGroup"];
     }
-    [NSNotificationCenter.defaultCenter postNotificationName:@"UpdateGroups" object:self];
-    [self saveGroups];
+
+    [self saveGroupsAndNotify];
 }
 
 - (void)moveGroupAtRow:(NSInteger)oldRow toRow:(NSInteger)newRow
 {
-    if (oldRow < 0 || oldRow >= self.fGroups.count || newRow < 0 || newRow >= self.fGroups.count)
+    if (oldRow < 0 || oldRow >= self.fGroups.count || newRow < 0 || newRow >= self.fGroups.count) {
         return;
+    }
+
     [self.fGroups moveObjectAtIndex:oldRow toIndex:newRow];
-    [self rebuildIndexMap]; // Critical: Map must be updated as table row positions shifted[self saveGroups];
-    [NSNotificationCenter.defaultCenter postNotificationName:@"UpdateGroups" object:self];
+    [self rebuildIndexMap];
+
+    [self saveGroupsAndNotify];
 }
 
 #pragma mark - UI Menu & Torrent Matching
@@ -394,19 +429,20 @@ static CGFloat const kIconWidthSmall = 12.0;
 {
     // Evaluate smart-rules linearly to find the first matching category
     for (TRGroup* group in self.fGroups) {
-        if ([self torrent:torrent doesMatchRulesForGroupAtIndex:group.groupIndex]) {
+        if ([self torrent:torrent doesMatchRulesForGroup:group]) {
             return group.groupIndex;
         }
     }
     return -1;
 }
 
-- (BOOL)torrent:(Torrent*)torrent doesMatchRulesForGroupAtIndex:(NSInteger)index
+- (BOOL)torrent:(Torrent*)torrent doesMatchRulesForGroup:(TRGroup*)group
 {
-    if (![self usesAutoAssignRulesForIndex:index]) {
+    if (group.usesAutoGroupRules == NO) {
         return NO;
     }
-    NSPredicate* predicate = [self autoAssignRulesForIndex:index];
+
+    NSPredicate* predicate = group.autoGroupRules;
     [predicate allowEvaluation];
     BOOL eval = NO;
     @try {
@@ -420,7 +456,7 @@ static CGFloat const kIconWidthSmall = 12.0;
 
 #pragma mark - Icon Graphics Rendering
 
-- (NSImage*)imageForGroupNone
+- (nonnull NSImage*)imageForGroupNone
 {
     static NSImage* icon;
     if (icon)
@@ -437,19 +473,27 @@ static CGFloat const kIconWidthSmall = 12.0;
     return icon;
 }
 
-- (NSImage*)imageForGroup:(TRGroup*)group
+- (nonnull NSImage*)imageForGroup:(TRGroup*)group
 {
-    if (group.icon)
-        return group.icon; // Render the crisp round badge matching the group color and cache it inside the model instance
+    if (group.icon) {
+        return group.icon;
+    }
+
+    // Render the crisp round badge matching the group color and cache it inside the model instance
     NSImage* icon = [NSImage discIconWithColor:group.color insetFactor:0];
     group.icon = icon;
+
     return icon;
 }
 
-- (NSImage*)imageForIndex:(NSInteger)index
+- (nonnull NSImage*)imageForIndex:(NSInteger)index
 {
-    NSInteger orderIndex = [self rowValueForIndex:index];
-    TRGroup* group = orderIndex != -1 ? self.fGroups[orderIndex] : nil;
+    TRGroup* group = [self groupForIndex:index];
+
+    if (group == nil) {
+        return [self imageForGroupNone];
+    }
+
     return [self imageForGroup:group];
 }
 
