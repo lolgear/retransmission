@@ -25,7 +25,7 @@ static CGFloat const kIconWidthSmall = 12.0;
 @property(nonatomic, assign) BOOL usesAutoGroupRules;
 @property(nonatomic, strong, nullable) NSPredicate* autoGroupRules;
 
-- (instancetype)initWithIndex:(NSInteger)index name:(NSString*)name color:(NSColor*)color;
+- (instancetype)initWithIndex:(NSInteger)index name:(nullable NSString*)name color:(nullable NSColor*)color;
 
 @end
 
@@ -36,13 +36,13 @@ static CGFloat const kIconWidthSmall = 12.0;
     return YES;
 }
 
-- (instancetype)initWithIndex:(NSInteger)index name:(NSString*)name color:(NSColor*)color
+- (instancetype)initWithIndex:(NSInteger)index name:(nullable NSString*)name color:(nullable NSColor*)color
 {
     self = [super init];
     if (self) {
         _groupIndex = index;
-        _name = [name copy];
-        _color = color;
+        _name = [name copy] ?: @"";
+        _color = color ?: NSColor.systemGrayColor;
     }
     return self;
 }
@@ -236,7 +236,7 @@ static CGFloat const kIconWidthSmall = 12.0;
     return [self groupForIndex:index].name;
 }
 
-- (void)setName:(NSString*)name forIndex:(NSInteger)index
+- (void)setName:(nullable NSString*)name forIndex:(NSInteger)index
 {
     TRGroup* group = [self groupForIndex:index];
 
@@ -244,7 +244,7 @@ static CGFloat const kIconWidthSmall = 12.0;
         return;
     }
 
-    group.name = name;
+    group.name = name ?: @"";
     [self saveGroupsAndNotify];
 }
 
@@ -253,7 +253,7 @@ static CGFloat const kIconWidthSmall = 12.0;
     return [self groupForIndex:index].color;
 }
 
-- (void)setColor:(NSColor*)color forIndex:(NSInteger)index
+- (void)setColor:(nullable NSColor*)color forIndex:(NSInteger)index
 {
     TRGroup* group = [self groupForIndex:index];
 
@@ -262,7 +262,7 @@ static CGFloat const kIconWidthSmall = 12.0;
     }
 
     group.icon = nil; // Invalidate cached icon to force re-render with the new color
-    group.color = color;
+    group.color = color ?: NSColor.systemGrayColor;
     [self saveGroupsAndNotify];
 }
 

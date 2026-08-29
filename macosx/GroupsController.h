@@ -6,9 +6,11 @@
 
 @class Torrent;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface GroupsController : NSObject
 
-@property(nonatomic, class, readonly) GroupsController* groups;
+@property(nonatomic, class, readonly, nonnull) GroupsController* groups;
 
 @property(nonatomic, readonly) NSInteger numberOfGroups;
 
@@ -16,7 +18,7 @@
 - (NSInteger)indexForRow:(NSInteger)row;
 
 - (nullable NSString*)nameForIndex:(NSInteger)index;
-- (void)setName:(NSString*)name forIndex:(NSInteger)index;
+- (void)setName:(nullable NSString*)name forIndex:(NSInteger)index;
 
 - (nonnull NSImage*)imageForIndex:(NSInteger)index;
 
@@ -40,7 +42,9 @@
 
 - (void)moveGroupAtRow:(NSInteger)oldRow toRow:(NSInteger)newRow;
 
-- (nonnull NSMenu*)groupMenuWithTarget:(id)target action:(SEL)action isSmall:(BOOL)small;
+- (nonnull NSMenu*)groupMenuWithTarget:(nullable id)target action:(nullable SEL)action isSmall:(BOOL)small;
 
 - (NSInteger)groupIndexForTorrent:(Torrent*)torrent;
 @end
+
+NS_ASSUME_NONNULL_END
