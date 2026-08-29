@@ -59,19 +59,20 @@ typedef NS_ENUM(NSUInteger, FilePriorityMenuTag) { //
 
 - (void)setTorrent:(Torrent*)torrent
 {
-    
-    // Close all folders.
-    [self.fOutline collapseItem:nil collapseChildren:YES];
-
-    // 1. Update the underlying data source
-    _torrent = torrent;
-    [self.fFileList setArray:torrent.fileList ?: @[]];
+    // 1. Clear filter and perform necessary updates.
     self.filterText = nil;
 
-    // 2. Clear selection before mutating the layout to prevent selection artifacts
+    // 2. Close all folders (we need to calculate number of rows).
+    [self.fOutline collapseItem:nil collapseChildren:YES];
+
+    // 3. Clear selection before mutating the layout to prevent selection artifacts
     [self.fOutline deselectAll:nil];
 
-    // 3. Perform a safe batch update to preserve view hierarchy and reuse NSViews
+    // 4. Set new DataSource
+    _torrent = torrent;
+    [self.fFileList setArray:torrent.fileList ?: @[]];
+
+    // 5. Perform a safe batch update to preserve view hierarchy and reuse NSViews
     [self.fOutline beginUpdates];
 
     // Remove the old rows from the root (parent: nil)
@@ -81,7 +82,7 @@ typedef NS_ENUM(NSUInteger, FilePriorityMenuTag) { //
         [self.fOutline removeItemsAtIndexes:oldIndexes inParent:nil withAnimation:NSTableViewAnimationEffectNone];
     }
 
-    // Insert the new rows. AppKit will re-map existing NSTableCellViews directly into these new indices
+    // Insert the new rows.
     NSUInteger newRowCount = self.fFileList.count;
     if (newRowCount > 0) {
         auto newIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, newRowCount)];
