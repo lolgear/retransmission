@@ -134,15 +134,21 @@ static CGFloat const kIconWidthSmall = 12.0;
         }
         // 2. Backward compatibility: Migrate old untyped dictionaries to TRGroup objects
         else if ((data = [NSUserDefaults.standardUserDefaults dataForKey:@"GroupDicts"])) {
-            NSArray* oldDicts = [NSKeyedUnarchiver unarchivedObjectOfClasses:[NSSet setWithObjects:NSArray.class,
-                                                                                                   NSDictionary.class,
+            NSError* error;
+            NSArray* oldDicts = [NSKeyedUnarchiver unarchivedObjectOfClasses:[NSSet setWithObjects:NSMutableArray.class,
+                                                                                                   NSMutableDictionary.class,
                                                                                                    NSNumber.class,
                                                                                                    NSColor.class,
                                                                                                    NSString.class,
                                                                                                    NSPredicate.class,
                                                                                                    nil]
                                                                     fromData:data
-                                                                       error:nil];
+                                                                       error:&error];
+
+            if (error != nil) {
+                NSLog(@"Got error in groups decoding: %@", error);
+            }
+
             if (oldDicts != nil) {
                 _fGroups = [[NSMutableArray alloc] init];
                 for (NSDictionary* dict in oldDicts) {
@@ -155,9 +161,8 @@ static CGFloat const kIconWidthSmall = 12.0;
                     [_fGroups addObject:g];
                 }
                 [self saveGroups];
+                [NSUserDefaults.standardUserDefaults removeObjectForKey:@"GroupDicts"];
             }
-
-            [NSUserDefaults.standardUserDefaults removeObjectForKey:@"GroupDicts"];
         }
 
         // 3. Fallback: Initialize with default color-coded groups if no saved data exists
