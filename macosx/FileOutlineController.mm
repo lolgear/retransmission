@@ -62,32 +62,28 @@ typedef NS_ENUM(NSUInteger, FilePriorityMenuTag) { //
     // 1. Clear filter and perform necessary updates.
     self.filterText = nil;
 
-    // 2. Close all folders (we need to calculate number of rows).
-    [self.fOutline collapseItem:nil collapseChildren:YES];
-
-    // 3. Clear selection before mutating the layout to prevent selection artifacts
+    // 2. Clear selection before mutating the layout to prevent selection artifacts
     [self.fOutline deselectAll:nil];
 
-    // 4. Set new DataSource
+    // 3. Remember old number of top items.
+    NSUInteger const oldRootCount = self.fFileList.count;
+    auto oldIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, oldRootCount)];
+
+    // 4. Set new dataSource
     _torrent = torrent;
     [self.fFileList setArray:torrent.fileList ?: @[]];
+
+    NSUInteger const newRowCount = self.fFileList.count;
+    auto newIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, newRowCount)];
 
     // 5. Perform a safe batch update to preserve view hierarchy and reuse NSViews
     [self.fOutline beginUpdates];
 
     // Remove the old rows from the root (parent: nil)
-    NSInteger oldRootCount = self.fOutline.numberOfRows;
-    if (oldRootCount > 0) {
-        auto oldIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, oldRootCount)];
-        [self.fOutline removeItemsAtIndexes:oldIndexes inParent:nil withAnimation:NSTableViewAnimationEffectNone];
-    }
+    [self.fOutline removeItemsAtIndexes:oldIndexes inParent:nil withAnimation:NSTableViewAnimationEffectNone];
 
     // Insert the new rows.
-    NSUInteger newRowCount = self.fFileList.count;
-    if (newRowCount > 0) {
-        auto newIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, newRowCount)];
-        [self.fOutline insertItemsAtIndexes:newIndexes inParent:nil withAnimation:NSTableViewAnimationEffectNone];
-    }
+    [self.fOutline insertItemsAtIndexes:newIndexes inParent:nil withAnimation:NSTableViewAnimationEffectNone];
 
     [self.fOutline endUpdates];
 }
