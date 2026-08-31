@@ -609,9 +609,25 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
 
 - (void)toggleGroupRowRatio
 {
-    BOOL displayGroupRowRatio = [self.fDefaults boolForKey:@"DisplayGroupRowRatio"];
-    [self.fDefaults setBool:!displayGroupRowRatio forKey:@"DisplayGroupRowRatio"];
-    [self reloadVisibleRows];
+    BOOL updatedDisplayGroupRowRatio = ![self.fDefaults boolForKey:@"DisplayGroupRowRatio"];
+    [self.fDefaults setBool:updatedDisplayGroupRowRatio forKey:@"DisplayGroupRowRatio"];
+
+    if (![self.fDefaults boolForKey:@"SortByGroup"]) {
+        return;
+    }
+
+    NSRange visibleRows = [self rowsInRect:self.visibleRect];
+
+    for (NSUInteger i = 0; i < visibleRows.length; ++i) {
+        NSUInteger row = visibleRows.location + i;
+
+        id item = [self itemAtRow:row];
+
+        if ([item isKindOfClass:[TorrentGroup class]]) {
+            GroupCell* groupCell = (GroupCell*)[self viewAtColumn:0 row:row makeIfNecessary:NO];
+            [groupCell setDisplayRatio:updatedDisplayGroupRowRatio];
+        }
+    }
 }
 
 - (IBAction)toggleControlForTorrent:(id)sender
