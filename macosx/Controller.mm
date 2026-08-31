@@ -958,11 +958,18 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
     didReceiveResponse:(nonnull NSURLResponse*)response
      completionHandler:(nonnull void (^)(NSURLSessionResponseDisposition))completionHandler
 {
+    UTType* contentType = [UTType typeWithMIMEType:response.MIMEType];
     NSString* suggestedName = response.suggestedFilename;
-    if ([suggestedName.pathExtension caseInsensitiveCompare:@"torrent"] == NSOrderedSame) {
+    UTType* fileType = [UTType typeWithFilenameExtension:suggestedName.pathExtension];
+    UTType* torrentType = UTType.torrent;
+
+    BOOL isTorrent = [contentType conformsToType:torrentType] || [fileType conformsToType:torrentType];
+
+    if (isTorrent) {
         completionHandler(NSURLSessionResponseBecomeDownload);
         return;
     }
+
     completionHandler(NSURLSessionResponseCancel);
 
     NSString* message = [NSString
@@ -974,7 +981,14 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
         [alert addButtonWithTitle:NSLocalizedString(@"OK", "Download not a torrent -> button")];
         alert.messageText = NSLocalizedString(@"Torrent download failed", "Download not a torrent -> title");
         alert.informativeText = message;
-        [alert runModal];
+
+        NSWindow* mainWindow = NSApp.mainWindow ?: NSApp.keyWindow;
+        if (mainWindow) {
+            [alert beginSheetModalForWindow:mainWindow completionHandler:nil];
+        } else {
+            [NSApp activateIgnoringOtherApps:YES];
+            [alert runModal];
+        }
     });
 }
 
