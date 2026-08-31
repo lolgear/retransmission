@@ -433,7 +433,7 @@ static NSUInteger const kMaxQueueLength = 10000U;
 - (void)writeToFile:(id)sender
 {
     NSSavePanel* panel = [NSSavePanel savePanel];
-    panel.allowedFileTypes = @[ @"txt" ];
+    panel.allowedContentTypes = @[ UTTypeText ];
     panel.canSelectHiddenExtension = YES;
 
     panel.nameFieldStringValue = NSLocalizedString(@"untitled", "Save log panel -> default file name");

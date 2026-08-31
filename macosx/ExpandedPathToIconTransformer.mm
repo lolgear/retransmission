@@ -9,6 +9,7 @@
 #endif
 
 #import "ExpandedPathToIconTransformer.h"
+#import "DefaultAppHelper.h"
 
 @implementation ExpandedPathToIconTransformer
 
@@ -29,13 +30,10 @@
     }
 
     NSString* path = [value stringByExpandingTildeInPath];
-    NSImage* icon;
     //show a folder icon if the folder doesn't exist
-    if ([path.pathExtension isEqualToString:@""] && ![NSFileManager.defaultManager fileExistsAtPath:path]) {
-        icon = [NSWorkspace.sharedWorkspace iconForFileType:NSFileTypeForHFSTypeCode(kGenericFolderIcon)];
-    } else {
-        icon = [NSWorkspace.sharedWorkspace iconForFile:path];
-    }
+    auto isFolder = [path.pathExtension isEqualToString:@""] && ![NSFileManager.defaultManager fileExistsAtPath:path];
+    auto contentType = [UTType contentTypeForFilenameExtension:path isFolder:isFolder];
+    NSImage* icon = [NSWorkspace.sharedWorkspace iconForContentType:contentType];
 
     icon.size = NSMakeSize(16.0, 16.0);
 

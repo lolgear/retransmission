@@ -62,6 +62,7 @@
 #import "ExpandedPathToIconTransformer.h"
 #import "PowerManager.h"
 #import "Utils.h"
+#import "DefaultAppHelper.h"
 
 typedef NSString* ToolbarItemIdentifier NS_TYPED_EXTENSIBLE_ENUM;
 
@@ -1284,7 +1285,7 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
     panel.canChooseFiles = YES;
     panel.canChooseDirectories = NO;
 
-    panel.allowedFileTypes = @[ @"org.bittorrent.torrent", @"torrent" ];
+    panel.allowedContentTypes = @[ UTType.torrent ];
 
     [panel beginSheetModalForWindow:self.fWindow completionHandler:^(NSInteger result) {
         if (result == NSModalResponseOK) {
@@ -1875,7 +1876,7 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
 
     if (!torrent.magnet && [NSFileManager.defaultManager fileExistsAtPath:torrent.torrentLocation]) {
         NSSavePanel* panel = [NSSavePanel savePanel];
-        panel.allowedFileTypes = @[ @"org.bittorrent.torrent", @"torrent" ];
+        panel.allowedContentTypes = @[ UTType.torrent ];
         panel.extensionHidden = NO;
 
         panel.nameFieldStringValue = torrent.name;
@@ -3131,8 +3132,8 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
 
         NSString* fullFile = [path stringByAppendingPathComponent:file];
 
-        if (!([[NSWorkspace.sharedWorkspace typeOfFile:fullFile error:NULL] isEqualToString:@"org.bittorrent.torrent"] ||
-              [fullFile.pathExtension caseInsensitiveCompare:@"torrent"] == NSOrderedSame)) {
+        auto fileURL = [NSURL fileURLWithPath:fullFile];
+        if (!(fileURL.isTorrentFile)) {
             continue;
         }
 
@@ -3369,8 +3370,7 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
         NSArray<NSURL*>* files = [pasteboard readObjectsForClasses:@[ NSURL.class ]
                                                            options:@{ NSPasteboardURLReadingFileURLsOnlyKey : @YES }];
         for (NSURL* fileToParse in files) {
-            if ([[NSWorkspace.sharedWorkspace typeOfFile:fileToParse.path error:NULL] isEqualToString:@"org.bittorrent.torrent"] ||
-                [fileToParse.pathExtension caseInsensitiveCompare:@"torrent"] == NSOrderedSame) {
+            if (fileToParse.isTorrentFile) {
                 torrent = YES;
                 auto metainfo = tr_torrent_metainfo{};
                 if (metainfo.parse_torrent_file(fileToParse.path.UTF8String)) {
@@ -3431,8 +3431,7 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
                                                            options:@{ NSPasteboardURLReadingFileURLsOnlyKey : @YES }];
         NSMutableArray<NSString*>* filesToOpen = [NSMutableArray arrayWithCapacity:files.count];
         for (NSURL* file in files) {
-            if ([[NSWorkspace.sharedWorkspace typeOfFile:file.path error:NULL] isEqualToString:@"org.bittorrent.torrent"] ||
-                [file.pathExtension caseInsensitiveCompare:@"torrent"] == NSOrderedSame) {
+            if (file.isTorrentFile) {
                 torrent = YES;
                 auto metainfo = tr_torrent_metainfo{};
                 if (metainfo.parse_torrent_file(file.path.UTF8String)) {
