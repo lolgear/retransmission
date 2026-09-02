@@ -5,8 +5,18 @@
 #import "GroupCell.h"
 #import "NSStringAdditions.h"
 
+// Layout
+// Leading Stack
+static CGFloat const kIndicatorSize = 14.0;
+static NSEdgeInsets const kLeadingInsets = NSEdgeInsetsMake(0, 11, 0, 0);
+
+// Trailing Stack
+static CGFloat const kTrailingStackSize = 16.0;
+static NSEdgeInsets const kTrailingInsets = NSEdgeInsetsMake(1, 0, 1, 5);
+
 @interface GroupCell ()
-@property(nonatomic, readonly) NSStackView* stackView;
+@property(nonatomic, readonly) NSStackView* leadingStackView;
+@property(nonatomic, readonly) NSStackView* trailingStackView;
 @property(nonatomic, readonly) NSButton* downloadButton;
 @property(nonatomic, readonly) NSButton* uploadButton;
 @property(nonatomic, readonly) NSButton* ratioButton;
@@ -59,13 +69,19 @@
         button.lineBreakMode = NSLineBreakByClipping;
     }
 
-    auto stackView = [[NSStackView alloc] initWithFrame:NSZeroRect];
+    auto leadingStackView = [[NSStackView alloc] initWithFrame:NSZeroRect];
+    [leadingStackView addArrangedSubview:indicatorView];
+    [leadingStackView addArrangedSubview:titleField];
+    leadingStackView.edgeInsets = kLeadingInsets;
 
-    [stackView addArrangedSubview:downloadButton];
-    [stackView addArrangedSubview:uploadButton];
-    [stackView addArrangedSubview:ratioButton];
+    auto trailingStackView = [[NSStackView alloc] initWithFrame:NSZeroRect];
 
-    for (NSView* view in @[ indicatorView, titleField, stackView ]) {
+    [trailingStackView addArrangedSubview:downloadButton];
+    [trailingStackView addArrangedSubview:uploadButton];
+    [trailingStackView addArrangedSubview:ratioButton];
+    trailingStackView.edgeInsets = kTrailingInsets;
+
+    for (NSView* view in @[ leadingStackView, trailingStackView ]) {
         view.translatesAutoresizingMaskIntoConstraints = NO;
         [self addSubview:view];
     }
@@ -75,27 +91,24 @@
     _downloadButton = downloadButton;
     _uploadButton = uploadButton;
     _ratioButton = ratioButton;
-    _stackView = stackView;
+    _leadingStackView = leadingStackView;
+    _trailingStackView = trailingStackView;
 }
 
 - (void)setupConstraints
 {
     [NSLayoutConstraint activateConstraints:@[
-        // IndicatorView
-        [self.indicatorView.leadingAnchor constraintEqualToAnchor:self.leadingAnchor constant:11],
-        [self.indicatorView.centerYAnchor constraintEqualToAnchor:self.centerYAnchor],
-        [self.indicatorView.widthAnchor constraintEqualToConstant:14],
-        [self.indicatorView.heightAnchor constraintEqualToConstant:14],
+        // Leading Stack
+        [self.leadingStackView.leadingAnchor constraintEqualToAnchor:self.leadingAnchor],
+        [self.leadingStackView.centerYAnchor constraintEqualToAnchor:self.centerYAnchor],
+        [self.indicatorView.widthAnchor constraintEqualToConstant:kIndicatorSize],
+        [self.indicatorView.heightAnchor constraintEqualToConstant:kIndicatorSize],
 
-        // TitleField
-        [self.titleField.leadingAnchor constraintEqualToAnchor:self.indicatorView.trailingAnchor constant:5],
-        [self.titleField.centerYAnchor constraintEqualToAnchor:self.centerYAnchor],
-
-        // StackView
-        [self.stackView.leadingAnchor constraintGreaterThanOrEqualToAnchor:self.titleField.trailingAnchor],
-        [self.stackView.trailingAnchor constraintEqualToAnchor:self.trailingAnchor constant:-5],
-        [self.stackView.centerYAnchor constraintEqualToAnchor:self.centerYAnchor],
-        [self.stackView.heightAnchor constraintEqualToConstant:16],
+        // Trailing Stack
+        [self.trailingStackView.leadingAnchor constraintGreaterThanOrEqualToAnchor:self.titleField.trailingAnchor],
+        [self.trailingStackView.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
+        [self.trailingStackView.centerYAnchor constraintEqualToAnchor:self.centerYAnchor],
+        [self.trailingStackView.heightAnchor constraintEqualToConstant:kTrailingStackSize],
     ]];
 
     [self.titleField setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow
