@@ -22,12 +22,6 @@
     self.indentationPerLevel = 14.0;
 }
 
-- (void)mouseDown:(NSEvent*)event
-{
-    [self.window makeKeyWindow];
-    [super mouseDown:event];
-}
-
 - (NSMenu*)menuForEvent:(NSEvent*)event
 {
     NSInteger const row = [self rowAtPoint:[self convertPoint:event.locationInWindow fromView:nil]];
