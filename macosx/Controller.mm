@@ -958,9 +958,11 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
     didReceiveResponse:(nonnull NSURLResponse*)response
      completionHandler:(nonnull void (^)(NSURLSessionResponseDisposition))completionHandler
 {
-    UTType* contentType = [UTType typeWithMIMEType:response.MIMEType];
+    NSString* mimeType = response.MIMEType;
+    UTType* contentType = mimeType.length > 0 ? [UTType typeWithMIMEType:mimeType] : nil;
     NSString* suggestedName = response.suggestedFilename;
-    UTType* fileType = [UTType typeWithFilenameExtension:suggestedName.pathExtension];
+    NSString* suggestedExtension = suggestedName.pathExtension;
+    UTType* fileType = suggestedExtension.length > 0 ? [UTType typeWithFilenameExtension:suggestedExtension] : nil;
     UTType* torrentType = UTType.torrent;
 
     BOOL isTorrent = [contentType conformsToType:torrentType] || [fileType conformsToType:torrentType];
@@ -986,7 +988,11 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
         if (mainWindow) {
             [alert beginSheetModalForWindow:mainWindow completionHandler:nil];
         } else {
-            [NSApp activateIgnoringOtherApps:YES];
+            if (@available(macOS 14.0, *)) {
+                [NSApp activate];
+            } else {
+                [NSApp activateIgnoringOtherApps:YES];
+            }
             [alert runModal];
         }
     });

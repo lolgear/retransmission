@@ -30,11 +30,17 @@
     }
 
     NSString* path = [value stringByExpandingTildeInPath];
-    //show a folder icon if the folder doesn't exist
-    auto isFolder = [path.pathExtension isEqualToString:@""] && ![NSFileManager.defaultManager fileExistsAtPath:path];
-    auto contentType = [UTType contentTypeForFilenameExtension:path isFolder:isFolder];
-    NSImage* icon = [NSWorkspace.sharedWorkspace iconForContentType:contentType];
+    NSImage* icon;
+    if ([NSFileManager.defaultManager fileExistsAtPath:path]) {
+        icon = [NSWorkspace.sharedWorkspace iconForFile:path];
+    } else {
+        //show a folder icon if the path has no extension
+        auto isFolder = path.pathExtension.length == 0;
+        auto contentType = [UTType contentTypeForFilenameExtension:path.pathExtension isFolder:isFolder];
+        icon = [NSWorkspace.sharedWorkspace iconForContentType:contentType];
+    }
 
+    icon = [icon copy];
     icon.size = NSMakeSize(16.0, 16.0);
 
     return icon;

@@ -99,7 +99,7 @@
 
     NSImage* icon;
     if (count == 1) {
-        auto fileType = [UTType contentTypeForFilenameExtension:name.pathExtension isFolder:fileCount <= 1];
+        auto fileType = [UTType contentTypeForFilenameExtension:name.pathExtension isFolder:fileCount > 1];
         icon = [NSWorkspace.sharedWorkspace iconForContentType:fileType];
     } else {
         name = [NSString localizedStringWithFormat:NSLocalizedString(@"%lu Torrent Files", "Drag overlay -> torrents"), count];

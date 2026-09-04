@@ -45,21 +45,13 @@ static NSString* const kTorrentFileType = @"org.bittorrent.torrent";
     if ([self getResourceValue:&contentType forKey:NSURLContentTypeKey error:NULL] && contentType) {
         return [contentType conformsToType:UTType.torrent];
     }
-    return NO;
+
+    // LaunchServices resolves .torrent to another declared type when a different
+    // client owns it, and to a dynamic UTI when nothing is registered yet,
+    // so the extension stays authoritative.
+    return [self.pathExtension caseInsensitiveCompare:@"torrent"] == NSOrderedSame;
 }
 @end
-
-UTType* GetTorrentFileType(void)
-{
-    static UTType* result = nil;
-
-    static dispatch_once_t once;
-    dispatch_once(&once, ^{
-        result = [UTType exportedTypeWithIdentifier:kTorrentFileType conformingToType:UTTypeData];
-    });
-
-    return result;
-}
 
 @interface DefaultAppHelper ()
 

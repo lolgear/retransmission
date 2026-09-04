@@ -167,6 +167,7 @@ static NSMutableSet* creatorWindowControllerSet;
     auto fileType = [UTType contentTypeForFilenameExtension:self.fPath.pathExtension isFolder:is_folder];
 
     NSImage* icon = [NSWorkspace.sharedWorkspace iconForContentType:fileType];
+    icon = [icon copy];
     icon.size = self.fIconView.frame.size;
     self.fIconView.image = icon;
 
