@@ -91,7 +91,7 @@ typedef NS_ENUM(NSUInteger, TabTag) {
 
     // Any click makes the inspector the key window.
     // Table views return NO from needsPanelToBecomeKey.
-    // Without this, the file, tracker and web seedlists would not focus it.
+    // Without this, the file, tracker and web seed lists would not focus it.
     window.becomesKeyOnlyIfNeeded = NO;
 
     //disable green maximise window button
