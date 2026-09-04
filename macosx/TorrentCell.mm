@@ -279,15 +279,20 @@ static CGFloat const kRevealButtonTrailingOffset = -8.0; // inverted for constra
 
 - (void)setTorrentPriority:(tr_priority_t)priority
 {
-    if (priority != TR_PRI_NORMAL) {
-        NSImage* priorityImage = [NSImage imageNamed:(priority == TR_PRI_HIGH ? @"PriorityHighTemplate" : @"PriorityLowTemplate")];
+    BOOL const hasPriority = priority != TR_PRI_NORMAL;
 
-        self.fTorrentPriorityView.image = priorityImage;
+    NSImage* const image = hasPriority ?
+        [NSImage imageNamed:(priority == TR_PRI_HIGH ? @"PriorityHighTemplate" : @"PriorityLowTemplate")] :
+        nil;
 
-        [self.fStackView setVisibilityPriority:NSStackViewVisibilityPriorityMustHold forView:self.fTorrentPriorityView];
-    } else {
-        [self.fStackView setVisibilityPriority:NSStackViewVisibilityPriorityNotVisible forView:self.fTorrentPriorityView];
+    NSStackViewVisibilityPriority const visibility = hasPriority ? NSStackViewVisibilityPriorityMustHold : NSStackViewVisibilityPriorityNotVisible;
+
+    if (self.fTorrentPriorityView.image == image && [self.fStackView visibilityPriorityForView:self.fTorrentPriorityView] == visibility) {
+        return;
     }
+
+    self.fTorrentPriorityView.image = image;
+    [self.fStackView setVisibilityPriority:visibility forView:self.fTorrentPriorityView];
 }
 
 // otherwise progress bar is inverted
