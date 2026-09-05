@@ -9,6 +9,7 @@
 // Badge
 static CGFloat const kBadgeWidth = 325.0;
 static CGFloat const kBadgeHeight = 84.0;
+static CGFloat const kBadgeCornerRadius = 15.0;
 
 // MainStack
 static CGFloat const kMainStackInset = 10.0;
@@ -22,9 +23,9 @@ static CGFloat const kTextStackSpacing = 2.0;
 
 @interface DragOverlayView ()
 
-@property(nonatomic, readonly) NSImageView* iconImageView;
-@property(nonatomic, readonly) NSTextField* titleLabel;
-@property(nonatomic, readonly) NSTextField* subtitleLabel;
+@property(nonatomic, readonly) NSImageView* fIconImageView;
+@property(nonatomic, readonly) NSTextField* fTitleLabel;
+@property(nonatomic, readonly) NSTextField* fSubtitleLabel;
 
 @end
 
@@ -37,25 +38,25 @@ static CGFloat const kTextStackSpacing = 2.0;
         badgeContainer.translatesAutoresizingMaskIntoConstraints = NO;
         badgeContainer.wantsLayer = YES;
         badgeContainer.layer.backgroundColor = [NSColor colorWithCalibratedWhite:0.0 alpha:0.75].CGColor;
-        badgeContainer.layer.cornerRadius = 15.0;
+        badgeContainer.layer.cornerRadius = kBadgeCornerRadius;
         [self addSubview:badgeContainer];
 
-        _iconImageView = [[NSImageView alloc] initWithFrame:NSZeroRect];
-        _iconImageView.imageScaling = NSImageScaleProportionallyUpOrDown;
+        _fIconImageView = [[NSImageView alloc] initWithFrame:NSZeroRect];
+        _fIconImageView.imageScaling = NSImageScaleProportionallyUpOrDown;
 
-        _titleLabel = [NSTextField labelWithString:@""];
-        _titleLabel.font = [NSFont boldSystemFontOfSize:18.0];
+        _fTitleLabel = [NSTextField labelWithString:@""];
+        _fTitleLabel.font = [NSFont boldSystemFontOfSize:18.0];
 
-        _subtitleLabel = [NSTextField labelWithString:@""];
-        _subtitleLabel.font = [NSFont systemFontOfSize:14.0];
+        _fSubtitleLabel = [NSTextField labelWithString:@""];
+        _fSubtitleLabel.font = [NSFont systemFontOfSize:14.0];
 
-        for (NSTextField* label in @[ _titleLabel, _subtitleLabel ]) {
+        for (NSTextField* label in @[ _fTitleLabel, _fSubtitleLabel ]) {
             label.textColor = NSColor.whiteColor;
             label.maximumNumberOfLines = 1;
             label.lineBreakMode = NSLineBreakByTruncatingMiddle;
         }
 
-        NSStackView* textStackView = [NSStackView stackViewWithViews:@[ _titleLabel, _subtitleLabel ]];
+        NSStackView* textStackView = [NSStackView stackViewWithViews:@[ _fTitleLabel, _fSubtitleLabel ]];
         textStackView.orientation = NSUserInterfaceLayoutOrientationVertical;
         textStackView.alignment = NSLayoutAttributeLeading;
         textStackView.spacing = kTextStackSpacing;
@@ -63,7 +64,7 @@ static CGFloat const kTextStackSpacing = 2.0;
         // Prevent the vertical stack from stretching awkwardly in height
         [textStackView setContentHuggingPriority:NSLayoutPriorityDefaultHigh forOrientation:NSLayoutConstraintOrientationVertical];
 
-        NSStackView* mainStackView = [NSStackView stackViewWithViews:@[ _iconImageView, textStackView ]];
+        NSStackView* mainStackView = [NSStackView stackViewWithViews:@[ _fIconImageView, textStackView ]];
         mainStackView.translatesAutoresizingMaskIntoConstraints = NO;
         mainStackView.orientation = NSUserInterfaceLayoutOrientationHorizontal;
         mainStackView.alignment = NSLayoutAttributeCenterY;
@@ -81,8 +82,8 @@ static CGFloat const kTextStackSpacing = 2.0;
             [badgeContainer.widthAnchor constraintEqualToConstant:kBadgeWidth],
             [badgeContainer.heightAnchor constraintEqualToConstant:kBadgeHeight],
 
-            [_iconImageView.widthAnchor constraintEqualToConstant:kIconSize],
-            [_iconImageView.heightAnchor constraintEqualToConstant:kIconSize],
+            [_fIconImageView.widthAnchor constraintEqualToConstant:kIconSize],
+            [_fIconImageView.heightAnchor constraintEqualToConstant:kIconSize],
 
             [mainStackView.leadingAnchor constraintEqualToAnchor:badgeContainer.leadingAnchor],
             [mainStackView.trailingAnchor constraintEqualToAnchor:badgeContainer.trailingAnchor],
@@ -95,9 +96,9 @@ static CGFloat const kTextStackSpacing = 2.0;
 
 - (void)setOverlay:(NSImage*)icon mainLine:(NSString*)mainLine subLine:(NSString*)subLine
 {
-    self.iconImageView.image = icon;
-    self.titleLabel.stringValue = mainLine ?: @"";
-    self.subtitleLabel.stringValue = subLine ?: @"";
+    self.fIconImageView.image = icon;
+    self.fTitleLabel.stringValue = mainLine ?: @"";
+    self.fSubtitleLabel.stringValue = subLine ?: @"";
 }
 
 @end
