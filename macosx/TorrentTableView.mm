@@ -587,6 +587,10 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
     BOOL minimal = [self.fDefaults boolForKey:@"SmallView"];
     NSInteger row = [self rowForView:view];
 
+    if (row < 0) {
+        return;
+    }
+
     if (minimal) {
         if ([view isKindOfClass:[TorrentCellActionButton class]]) {
             SmallTorrentCell* smallCell = [self viewAtColumn:0 row:row makeIfNecessary:NO];
@@ -631,6 +635,10 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
 {
     BOOL minimal = [self.fDefaults boolForKey:@"SmallView"];
     NSInteger row = [self rowForView:view];
+
+    if (row < 0) {
+        return;
+    }
 
     if (minimal) {
         if ([view isKindOfClass:[TorrentCellActionButton class]]) {
