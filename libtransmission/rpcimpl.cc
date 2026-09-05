@@ -87,8 +87,8 @@ namespace Error
         return "file index out of range"sv;
     case PIECE_IDX_OOR:
         return "piece index out of range"sv;
-    case HTTP_ERROR:
-        return "HTTP error from backend service"sv;
+    case FETCH_ERROR:
+        return "error when fetching from remote service"sv;
     case CORRUPT_TORRENT:
         return "invalid or corrupt torrent file"sv;
     case INVALID_BLOCKLIST_DATA:
@@ -1370,7 +1370,7 @@ void onPortTested(tr_web::FetchResponse const& web_response)
 {
     using namespace JsonRpc;
 
-    auto const& [status, headers, body, primary_ip, did_connect, did_timeout, user_data] = web_response;
+    auto const& [url, status, headers, body, primary_ip, did_connect, did_timeout, user_data] = web_response;
     auto* data = static_cast<tr_rpc_idle_data*>(user_data);
 
     if (auto const addr = tr_address::from_string(primary_ip);
@@ -1381,7 +1381,7 @@ void onPortTested(tr_web::FetchResponse const& web_response)
     if (status != 200) {
         tr_rpc_idle_done(
             data,
-            Error::HTTP_ERROR,
+            Error::FETCH_ERROR,
             fmt::format(
                 fmt::runtime(_("Couldn't test port: {error} ({error_code})")),
                 fmt::arg("error", tr_webGetResponseStr(status)),
@@ -1443,7 +1443,7 @@ void blocklistUpdate(tr_session* session, tr_variant::Map const& /*args_in*/, st
             break;
 
         case tr_blocklist_update_status::DownloadError:
-            tr_rpc_idle_done(idle_data, Error::HTTP_ERROR, result.error);
+            tr_rpc_idle_done(idle_data, Error::FETCH_ERROR, result.error);
             break;
 
         case tr_blocklist_update_status::SaveError:
@@ -1504,27 +1504,33 @@ struct add_torrent_idle_data {
 
 void onMetadataFetched(tr_web::FetchResponse const& web_response)
 {
-    auto const& [status, headers, body, primary_ip, did_connect, did_timeout, user_data] = web_response;
+    auto const& [url, status, headers, body, primary_ip, did_connect, did_timeout, user_data] = web_response;
     auto* data = static_cast<struct add_torrent_idle_data*>(user_data);
+
+    auto const parsed_url = tr_urlParse(url);
+    auto response_str = std::string{};
+    if (parsed_url && (parsed_url->scheme == "https"sv || parsed_url->scheme == "http"sv)) {
+        response_str = tr_webGetResponseStr(status);
+    }
 
     tr_logAddTrace(
         fmt::format(
-            "torrentAdd: HTTP response code was {} ({}); response length was {} bytes",
+            "torrentAdd: fetch response code was {} ({}); response length was {} bytes",
+            response_str,
             status,
-            tr_webGetResponseStr(status),
             std::size(body)));
 
-    if (status == 200 || status == 221) /* http or ftp success.. */
+    if (status == 200 || status == 221) // http or ftp success..
     {
         data->builder.set_metainfo(body);
         add_torrent_impl(data->data, data->builder);
     } else {
         tr_rpc_idle_done(
             data->data,
-            JsonRpc::Error::HTTP_ERROR,
+            JsonRpc::Error::FETCH_ERROR,
             fmt::format(
                 fmt::runtime(_("Couldn't fetch torrent: {error} ({error_code})")),
-                fmt::arg("error", tr_webGetResponseStr(status)),
+                fmt::arg("error", response_str),
                 fmt::arg("error_code", status)));
     }
 
