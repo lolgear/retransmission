@@ -15,11 +15,13 @@ static CGFloat const kTrailingStackSize = 16.0;
 static NSEdgeInsets const kTrailingInsets = NSEdgeInsetsMake(1, 0, 1, 5);
 
 @interface GroupCell ()
-@property(nonatomic, readonly) NSStackView* leadingStackView;
-@property(nonatomic, readonly) NSStackView* trailingStackView;
-@property(nonatomic, readonly) NSButton* downloadButton;
-@property(nonatomic, readonly) NSButton* uploadButton;
-@property(nonatomic, readonly) NSButton* ratioButton;
+@property(nonatomic, readonly) NSStackView* fLeadingStackView;
+@property(nonatomic, readonly) NSStackView* fTrailingStackView;
+@property(nonatomic, readonly) NSImageView* fIndicatorView;
+@property(nonatomic, readonly) NSTextField* fTitleField;
+@property(nonatomic, readonly) NSButton* fDownloadButton;
+@property(nonatomic, readonly) NSButton* fUploadButton;
+@property(nonatomic, readonly) NSButton* fRatioButton;
 @end
 
 @implementation GroupCell
@@ -39,12 +41,8 @@ static NSEdgeInsets const kTrailingInsets = NSEdgeInsetsMake(1, 0, 1, 5);
     auto indicatorView = [[NSImageView alloc] init];
     indicatorView.imageScaling = NSImageScaleProportionallyDown;
 
-    auto titleField = [[NSTextField alloc] init];
-    titleField.editable = NO;
-    titleField.selectable = NO;
-    titleField.bordered = NO;
+    auto titleField = [NSTextField labelWithString:@""];
     titleField.font = [NSFont boldSystemFontOfSize:NSFont.smallSystemFontSize];
-    titleField.drawsBackground = NO;
     titleField.textColor = NSColor.secondaryLabelColor;
     titleField.lineBreakMode = NSLineBreakByTruncatingMiddle;
     titleField.allowsExpansionToolTips = YES;
@@ -86,33 +84,31 @@ static NSEdgeInsets const kTrailingInsets = NSEdgeInsetsMake(1, 0, 1, 5);
         [self addSubview:view];
     }
 
-    _indicatorView = indicatorView;
-    _titleField = titleField;
-    _downloadButton = downloadButton;
-    _uploadButton = uploadButton;
-    _ratioButton = ratioButton;
-    _leadingStackView = leadingStackView;
-    _trailingStackView = trailingStackView;
+    _fIndicatorView = indicatorView;
+    _fTitleField = titleField;
+    _fDownloadButton = downloadButton;
+    _fUploadButton = uploadButton;
+    _fRatioButton = ratioButton;
+    _fLeadingStackView = leadingStackView;
+    _fTrailingStackView = trailingStackView;
 }
 
 - (void)setupConstraints
 {
     [NSLayoutConstraint activateConstraints:@[
-        // Leading Stack
-        [self.leadingStackView.leadingAnchor constraintEqualToAnchor:self.leadingAnchor],
-        [self.leadingStackView.centerYAnchor constraintEqualToAnchor:self.centerYAnchor],
-        [self.indicatorView.widthAnchor constraintEqualToConstant:kIndicatorSize],
-        [self.indicatorView.heightAnchor constraintEqualToConstant:kIndicatorSize],
+        [self.fLeadingStackView.leadingAnchor constraintEqualToAnchor:self.leadingAnchor],
+        [self.fLeadingStackView.centerYAnchor constraintEqualToAnchor:self.centerYAnchor],
+        [self.fIndicatorView.widthAnchor constraintEqualToConstant:kIndicatorSize],
+        [self.fIndicatorView.heightAnchor constraintEqualToConstant:kIndicatorSize],
 
-        // Trailing Stack
-        [self.trailingStackView.leadingAnchor constraintGreaterThanOrEqualToAnchor:self.titleField.trailingAnchor],
-        [self.trailingStackView.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
-        [self.trailingStackView.centerYAnchor constraintEqualToAnchor:self.centerYAnchor],
-        [self.trailingStackView.heightAnchor constraintEqualToConstant:kTrailingStackSize],
+        [self.fTrailingStackView.leadingAnchor constraintGreaterThanOrEqualToAnchor:self.fTitleField.trailingAnchor],
+        [self.fTrailingStackView.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
+        [self.fTrailingStackView.centerYAnchor constraintEqualToAnchor:self.centerYAnchor],
+        [self.fTrailingStackView.heightAnchor constraintEqualToConstant:kTrailingStackSize],
     ]];
 
-    [self.titleField setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow
-                                              forOrientation:NSLayoutConstraintOrientationHorizontal];
+    [self.fTitleField setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow
+                                               forOrientation:NSLayoutConstraintOrientationHorizontal];
 }
 
 - (void)setBackgroundStyle:(NSBackgroundStyle)backgroundStyle
@@ -120,24 +116,34 @@ static NSEdgeInsets const kTrailingInsets = NSEdgeInsetsMake(1, 0, 1, 5);
     [super setBackgroundStyle:backgroundStyle];
 
     auto isEmphasized = backgroundStyle == NSBackgroundStyleEmphasized;
-    self.titleField.textColor = isEmphasized ? NSColor.labelColor : NSColor.secondaryLabelColor;
+    self.fTitleField.textColor = isEmphasized ? NSColor.labelColor : NSColor.secondaryLabelColor;
 }
 
-- (void)setDownloadSpeed:(CGFloat)downloadSpeed uploadSpeed:(CGFloat)uploadSpeed ratio:(CGFloat)ratio
+- (void)updateImage:(NSImage*)image
 {
-    _downloadButton.title = [NSString stringForSpeed:downloadSpeed];
-    _uploadButton.title = [NSString stringForSpeed:uploadSpeed];
-    _ratioButton.title = [NSString stringForRatio:ratio];
+    self.fIndicatorView.image = image;
 }
 
-- (void)setDisplayRatio:(BOOL)displayRatio
+- (void)updateTitle:(NSString*)title
 {
-    _downloadButton.hidden = displayRatio;
-    _uploadButton.hidden = displayRatio;
-    _ratioButton.hidden = !displayRatio;
+    self.fTitleField.stringValue = title;
 }
 
-- (void)setTooltipForTorrentsCount:(NSUInteger)count
+- (void)updateDownloadSpeed:(CGFloat)downloadSpeed uploadSpeed:(CGFloat)uploadSpeed ratio:(CGFloat)ratio
+{
+    _fDownloadButton.title = [NSString stringForSpeed:downloadSpeed];
+    _fUploadButton.title = [NSString stringForSpeed:uploadSpeed];
+    _fRatioButton.title = [NSString stringForRatio:ratio];
+}
+
+- (void)updateDisplayRatio:(BOOL)displayRatio
+{
+    _fDownloadButton.hidden = displayRatio;
+    _fUploadButton.hidden = displayRatio;
+    _fRatioButton.hidden = !displayRatio;
+}
+
+- (void)updateTooltipForTorrentsCount:(NSUInteger)count
 {
     NSString* tooltipGroup;
     if (count == 1) {
@@ -147,6 +153,11 @@ static NSEdgeInsets const kTrailingInsets = NSEdgeInsetsMake(1, 0, 1, 5);
         tooltipGroup = [NSString localizedStringWithFormat:tooltipGroup, count];
     }
     self.toolTip = tooltipGroup;
+}
+
+- (CGRect)frameForTitle
+{
+    return self.fTitleField.frame;
 }
 
 @end

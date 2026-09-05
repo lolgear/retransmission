@@ -321,20 +321,19 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
 
         NSColor* groupColor = groupIndex != -1 ? [GroupsController.groups colorForIndex:groupIndex] :
                                                  [NSColor colorWithWhite:1.0 alpha:0];
-        groupCell.indicatorView.image = [NSImage discIconWithColor:groupColor insetFactor:0];
+        [groupCell updateImage:[NSImage discIconWithColor:groupColor insetFactor:0]];
 
         NSString* groupName = groupIndex != -1 ? [GroupsController.groups nameForIndex:groupIndex] :
                                                  NSLocalizedString(@"No Group", "Group table row");
-
-        groupCell.titleField.stringValue = groupName;
+        [groupCell updateTitle:groupName];
 
         auto aggregatedData = group.aggregatedData;
-        [groupCell setDownloadSpeed:aggregatedData.downloadRate uploadSpeed:aggregatedData.uploadRate ratio:aggregatedData.ratio];
+        [groupCell updateDownloadSpeed:aggregatedData.downloadRate uploadSpeed:aggregatedData.uploadRate ratio:aggregatedData.ratio];
 
         BOOL displayGroupRowRatio = [self.fDefaults boolForKey:@"DisplayGroupRowRatio"];
-        [groupCell setDisplayRatio:displayGroupRowRatio];
+        [groupCell updateDisplayRatio:displayGroupRowRatio];
 
-        [groupCell setTooltipForTorrentsCount:group.torrents.count];
+        [groupCell updateTooltipForTorrentsCount:group.torrents.count];
 
         return groupCell;
     }
@@ -752,7 +751,7 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
 
     //check if click is within the status/ratio rect
     GroupCell* groupCell = [self viewAtColumn:0 row:row makeIfNecessary:NO];
-    NSRect titleRect = groupCell.titleField.frame;
+    NSRect titleRect = groupCell.frameForTitle;
     CGFloat maxX = NSMaxX(titleRect);
 
     return point.x > maxX;
