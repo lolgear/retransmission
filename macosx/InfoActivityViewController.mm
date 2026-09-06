@@ -260,7 +260,7 @@ static CGFloat const kStackViewVerticalSpacing = 8.0;
 
 - (void)updatePiecesView:(id)sender
 {
-    if (self.fTorrents.count == 1) {
+    if (self.fTorrents.count == 1 && self.fTorrents[0].magnet == NO) {
         BOOL const availablity = [NSUserDefaults.standardUserDefaults boolForKey:@"PiecesViewShowAvailability"];
         [self setPiecesViewAvailability:!availablity];
     }
