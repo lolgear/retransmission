@@ -97,8 +97,6 @@ static NSString* const kWebSeedAnimationId = @"webSeed";
     auto row = sender.clickedRow;
     auto column = sender.clickedColumn;
 
-    NSLog(@"row: %@ column: %@", @(row), @(column));
-
     if ((row != -1) && (column == [sender columnWithIdentifier:@"Progress"])) {
         [NSUserDefaults.standardUserDefaults setBool:![NSUserDefaults.standardUserDefaults boolForKey:@"DisplayPeerProgressBarNumber"]
                                               forKey:@"DisplayPeerProgressBarNumber"];
