@@ -191,21 +191,4 @@ typedef struct PieceInfo {
     fRenderedHashString = self.torrent.hashString;
 }
 
-- (BOOL)acceptsFirstMouse:(NSEvent*)event
-{
-    return YES;
-}
-
-- (void)mouseDown:(NSEvent*)event
-{
-    if (self.torrent) {
-        BOOL const availability = ![NSUserDefaults.standardUserDefaults boolForKey:@"PiecesViewShowAvailability"];
-        [NSUserDefaults.standardUserDefaults setBool:availability forKey:@"PiecesViewShowAvailability"];
-
-        [self sendAction:self.action to:self.target];
-    }
-
-    [super mouseDown:event];
-}
-
 @end

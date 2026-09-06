@@ -40,6 +40,7 @@ static CGFloat const kStackViewVerticalSpacing = 8.0;
 
 @property(nonatomic) IBOutlet PiecesView* fPiecesView;
 @property(nonatomic) IBOutlet NSSegmentedControl* fPiecesControl;
+@property(nonatomic, readonly) NSClickGestureRecognizer* fGestureRecognizer;
 
 @property(nonatomic) IBOutlet NSStackView* fActivityStackView;
 @property(nonatomic) IBOutlet NSView* fDatesView;
@@ -66,6 +67,11 @@ static CGFloat const kStackViewVerticalSpacing = 8.0;
 {
     [super awakeFromNib];
     [self checkWindowSize];
+
+    if (self.fGestureRecognizer == nil) {
+        _fGestureRecognizer = [[NSClickGestureRecognizer alloc] initWithTarget:self action:@selector(updatePiecesView:)];
+        [self.fPiecesView addGestureRecognizer:_fGestureRecognizer];
+    }
 }
 
 - (CGFloat)fHorizLayoutHeight
@@ -236,21 +242,28 @@ static CGFloat const kStackViewVerticalSpacing = 8.0;
     }
 }
 
-- (void)setPiecesView:(id)sender
+- (void)setPiecesViewAvailability:(BOOL)piecesAvailableSegment
 {
-    BOOL const availability = [sender selectedSegment] == PiecesControlSegmentAvailable;
-    [NSUserDefaults.standardUserDefaults setBool:availability forKey:@"PiecesViewShowAvailability"];
-    [self updatePiecesView:nil];
-}
-
-- (void)updatePiecesView:(id)sender
-{
-    BOOL const piecesAvailableSegment = [NSUserDefaults.standardUserDefaults boolForKey:@"PiecesViewShowAvailability"];
+    [NSUserDefaults.standardUserDefaults setBool:piecesAvailableSegment forKey:@"PiecesViewShowAvailability"];
 
     [self.fPiecesControl setSelected:piecesAvailableSegment forSegment:PiecesControlSegmentAvailable];
     [self.fPiecesControl setSelected:!piecesAvailableSegment forSegment:PiecesControlSegmentProgress];
 
     [self.fPiecesView updateView];
+}
+
+- (void)setPiecesView:(id)sender
+{
+    BOOL const availability = [sender selectedSegment] == PiecesControlSegmentAvailable;
+    [self setPiecesViewAvailability:availability];
+}
+
+- (void)updatePiecesView:(id)sender
+{
+    if (self.fTorrents.count == 1) {
+        BOOL const availablity = [NSUserDefaults.standardUserDefaults boolForKey:@"PiecesViewShowAvailability"];
+        [self setPiecesViewAvailability:!availablity];
+    }
 }
 
 - (void)clearView
