@@ -8,23 +8,6 @@
 #import "GroupsController.h"
 #import "Torrent.h"
 
-@interface TorrentGroupData ()
-- (instancetype)initWithRatio:(CGFloat)ratio uploadRate:(CGFloat)uploadRate downloadRate:(CGFloat)downloadRate;
-@end
-
-@implementation TorrentGroupData
-- (instancetype)initWithRatio:(CGFloat)ratio uploadRate:(CGFloat)uploadRate downloadRate:(CGFloat)downloadRate
-{
-    self = [super init];
-    if (self) {
-        _ratio = ratio;
-        _uploadRate = uploadRate;
-        _downloadRate = downloadRate;
-    }
-    return self;
-}
-@end
-
 @implementation TorrentGroup
 
 - (instancetype)initWithGroup:(NSInteger)group
@@ -46,38 +29,7 @@
     return [GroupsController.groups rowValueForIndex:self.groupIndex];
 }
 
-- (CGFloat)ratio
-{
-    uint64_t uploaded = 0, total_size = 0;
-    for (Torrent* torrent in self.torrents) {
-        uploaded += torrent.uploadedTotal;
-        total_size += torrent.totalSizeSelected;
-    }
-
-    return tr_getRatio(uploaded, total_size);
-}
-
-- (CGFloat)uploadRate
-{
-    CGFloat rate = 0.0;
-    for (Torrent* torrent in self.torrents) {
-        rate += torrent.uploadRate;
-    }
-
-    return rate;
-}
-
-- (CGFloat)downloadRate
-{
-    CGFloat rate = 0.0;
-    for (Torrent* torrent in self.torrents) {
-        rate += torrent.downloadRate;
-    }
-
-    return rate;
-}
-
-- (TorrentGroupData*)aggregatedData
+- (TorrentGroupData)aggregatedData
 {
     uint64_t uploaded = 0;
     uint64_t total_size = 0;
@@ -96,7 +48,7 @@
 
     CGFloat ratio = tr_getRatio(uploaded, total_size);
 
-    auto result = [[TorrentGroupData alloc] initWithRatio:ratio uploadRate:uploadRate downloadRate:downloadRate];
+    auto result = (TorrentGroupData){ ratio, uploadRate, downloadRate };
     return result;
 }
 

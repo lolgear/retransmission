@@ -11,7 +11,8 @@ static CGFloat const kIndicatorSize = 14.0;
 static NSEdgeInsets const kLeadingInsets = NSEdgeInsetsMake(0, 11, 0, 0);
 
 // Trailing Stack
-static CGFloat const kTrailingStackSize = 16.0;
+static CGFloat const kTrailingStackHeight = 16.0;
+static CGFloat const kButtonWidth = 60.0;
 static NSEdgeInsets const kTrailingInsets = NSEdgeInsetsMake(1, 0, 1, 5);
 
 @interface GroupCell ()
@@ -60,7 +61,7 @@ static NSEdgeInsets const kTrailingInsets = NSEdgeInsetsMake(1, 0, 1, 5);
 
     for (NSButton* button in @[ downloadButton, uploadButton, ratioButton ]) {
         button.imageScaling = NSImageScaleProportionallyDown;
-        button.imagePosition = NSImageLeft;
+        button.imagePosition = NSImageLeading;
         button.bordered = NO;
         button.font = [NSFont boldSystemFontOfSize:NSFont.smallSystemFontSize];
         button.contentTintColor = NSColor.secondaryLabelColor;
@@ -104,11 +105,20 @@ static NSEdgeInsets const kTrailingInsets = NSEdgeInsetsMake(1, 0, 1, 5);
         [self.fTrailingStackView.leadingAnchor constraintGreaterThanOrEqualToAnchor:self.fTitleField.trailingAnchor],
         [self.fTrailingStackView.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
         [self.fTrailingStackView.centerYAnchor constraintEqualToAnchor:self.centerYAnchor],
-        [self.fTrailingStackView.heightAnchor constraintEqualToConstant:kTrailingStackSize],
+        [self.fTrailingStackView.heightAnchor constraintEqualToConstant:kTrailingStackHeight],
+
+        [self.fDownloadButton.widthAnchor constraintGreaterThanOrEqualToConstant:kButtonWidth],
+        [self.fUploadButton.widthAnchor constraintGreaterThanOrEqualToConstant:kButtonWidth],
+        [self.fRatioButton.widthAnchor constraintGreaterThanOrEqualToConstant:kButtonWidth]
     ]];
 
     [self.fTitleField setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow
                                                forOrientation:NSLayoutConstraintOrientationHorizontal];
+
+    [self.fDownloadButton setContentHuggingPriority:NSLayoutPriorityDefaultLow + 1
+                                     forOrientation:NSLayoutConstraintOrientationHorizontal];
+    [self.fUploadButton setContentHuggingPriority:NSLayoutPriorityDefaultLow + 1 forOrientation:NSLayoutConstraintOrientationHorizontal];
+    [self.fRatioButton setContentHuggingPriority:NSLayoutPriorityDefaultLow + 1 forOrientation:NSLayoutConstraintOrientationHorizontal];
 }
 
 - (void)setBackgroundStyle:(NSBackgroundStyle)backgroundStyle
@@ -116,7 +126,12 @@ static NSEdgeInsets const kTrailingInsets = NSEdgeInsetsMake(1, 0, 1, 5);
     [super setBackgroundStyle:backgroundStyle];
 
     auto isEmphasized = backgroundStyle == NSBackgroundStyleEmphasized;
-    self.fTitleField.textColor = isEmphasized ? NSColor.labelColor : NSColor.secondaryLabelColor;
+    auto color = isEmphasized ? NSColor.labelColor : NSColor.secondaryLabelColor;
+
+    self.fTitleField.textColor = color;
+    self.fDownloadButton.contentTintColor = color;
+    self.fUploadButton.contentTintColor = color;
+    self.fRatioButton.contentTintColor = color;
 }
 
 - (void)updateImage:(NSImage*)image
@@ -131,16 +146,16 @@ static NSEdgeInsets const kTrailingInsets = NSEdgeInsetsMake(1, 0, 1, 5);
 
 - (void)updateDownloadSpeed:(CGFloat)downloadSpeed uploadSpeed:(CGFloat)uploadSpeed ratio:(CGFloat)ratio
 {
-    _fDownloadButton.title = [NSString stringForSpeed:downloadSpeed];
-    _fUploadButton.title = [NSString stringForSpeed:uploadSpeed];
-    _fRatioButton.title = [NSString stringForRatio:ratio];
+    self.fDownloadButton.title = [NSString stringForSpeed:downloadSpeed];
+    self.fUploadButton.title = [NSString stringForSpeed:uploadSpeed];
+    self.fRatioButton.title = [NSString stringForRatio:ratio];
 }
 
 - (void)updateDisplayRatio:(BOOL)displayRatio
 {
-    _fDownloadButton.hidden = displayRatio;
-    _fUploadButton.hidden = displayRatio;
-    _fRatioButton.hidden = !displayRatio;
+    self.fDownloadButton.hidden = displayRatio;
+    self.fUploadButton.hidden = displayRatio;
+    self.fRatioButton.hidden = !displayRatio;
 }
 
 - (void)updateTooltipForTorrentsCount:(NSUInteger)count
@@ -157,7 +172,7 @@ static NSEdgeInsets const kTrailingInsets = NSEdgeInsetsMake(1, 0, 1, 5);
 
 - (CGRect)frameForTitle
 {
-    return self.fTitleField.frame;
+    return self.fLeadingStackView.frame;
 }
 
 @end
