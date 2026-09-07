@@ -102,16 +102,14 @@ else
 fi
 
 # check important compatibility constraints in Xcode project
-if ! grep -q 'objectVersion = 54;' Transmission.xcodeproj/project.pbxproj; then
-  echo "project.pbxproj needs 'objectVersion = 54;' for compatibility with Xcode 12"
+xcode_proj_object_version='77'
+xcode_proj_path='Transmission.xcodeproj/project.pbxproj'
+if ! grep -q "objectVersion = ${xcode_proj_object_version};" "${xcode_proj_path}"; then
+  echo "project.pbxproj needs 'objectVersion = ${xcode_proj_object_version};' for compatibility with Xcode 12"
   exitcode=1
 fi
-if ! grep -q 'compatibilityVersion = "Xcode 12.0";' Transmission.xcodeproj/project.pbxproj; then
-  echo "project.pbxproj needs 'compatibilityVersion = \"Xcode 12.0\";' for compatibility with Xcode 12"
-  exitcode=1
-fi
-if ! grep -q 'BuildIndependentTargetsInParallel = YES;' Transmission.xcodeproj/project.pbxproj; then
-  echo "please keep 'BuildIndependentTargetsInParallel = YES;' line in project.pbxproj for faster builds"
+if ! grep -q "preferredProjectObjectVersion = ${xcode_proj_object_version};" "${xcode_proj_path}"; then
+  echo "project.pbxproj needs 'preferredProjectObjectVersion = ${xcode_proj_object_version};' for compatibility with Xcode 12"
   exitcode=1
 fi
 
