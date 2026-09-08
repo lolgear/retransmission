@@ -17,6 +17,7 @@
 #include <fmt/format.h>
 
 #include <libtransmission/crypto-utils.h> // tr_base64_encode()
+#include <libtransmission/utils.h> // tr_num_parse()
 #include <libtransmission/web.h>
 
 #include "loopback-server.h"
@@ -29,6 +30,19 @@ namespace
 
 // LoopbackServer is shared via loopback-server.h.
 using tr::test::LoopbackServer;
+
+TEST(FetchOptionsTest, effectiveMaxFileSize)
+{
+    auto options = tr_web::FetchOptions{ "http://example.invalid/"s, nullptr, nullptr };
+
+    EXPECT_EQ(tr_web::FetchOptions::DefaultMaxFileSize, options.effective_max_file_size());
+
+    options.max_file_size = 123U;
+    EXPECT_EQ(123U, options.effective_max_file_size());
+
+    options.range = std::make_pair(uint64_t{ 100 }, uint64_t{ 199 });
+    EXPECT_EQ(100U, options.effective_max_file_size());
+}
 
 // tr_web needs a Mediator; this one only overrides the user-agent so a test
 // can confirm the header reaches the server.
@@ -92,6 +106,7 @@ TEST_F(WebTest, getReturnsBody)
     EXPECT_EQ("hello world"sv, response.body);
     EXPECT_TRUE(response.did_connect);
     EXPECT_FALSE(response.did_timeout);
+    EXPECT_FALSE(response.errmsg);
     EXPECT_EQ("127.0.0.1"sv, response.primary_ip);
 }
 
@@ -117,6 +132,16 @@ TEST_F(WebTest, httpErrorStatusIsSurfaced)
     auto const response = fetch(options());
     EXPECT_EQ(404, response.status);
     EXPECT_TRUE(response.did_connect);
+    EXPECT_FALSE(response.errmsg);
+}
+
+TEST_F(WebTest, curlErrorIsReported)
+{
+    auto const response = fetch(tr_web::FetchOptions{ "http://example.invalid", nullptr, nullptr });
+    EXPECT_EQ(0, response.status);
+    EXPECT_FALSE(response.did_timeout);
+    ASSERT_TRUE(response.errmsg);
+    EXPECT_NE(std::string::npos, response.errmsg->find("curl error: "));
 }
 
 TEST_F(WebTest, postSendsBody)
@@ -226,12 +251,32 @@ TEST_F(WebTest, userDataRoundTrips)
 
 TEST_F(WebTest, rangeRequestSetsHeader)
 {
+    server_.setHandler([](evhttp_request* req) { LoopbackServer::reply(req, 206, "Partial Content", "data"sv); });
+
     auto opts = options();
     opts.range = std::make_pair(uint64_t{ 0 }, uint64_t{ 3 });
 
-    fetch(std::move(opts));
+    auto const response = fetch(std::move(opts));
 
+    EXPECT_EQ(206, response.status);
+    EXPECT_FALSE(response.errmsg);
+    EXPECT_EQ("data"sv, response.body);
     EXPECT_EQ("bytes=0-3"sv, server_.lastRequest().headers.at("range"));
+}
+
+TEST_F(WebTest, rangeLengthTakesPrecedenceOverMaxFileSize)
+{
+    static auto constexpr Body = "data"sv;
+    server_.setHandler([](evhttp_request* req) { LoopbackServer::reply(req, 206, "Partial Content", Body); });
+
+    auto opts = options();
+    opts.max_file_size = 1U;
+    opts.range = std::make_pair(uint64_t{ 0 }, uint64_t{ 3 });
+
+    auto const response = fetch(std::move(opts));
+    EXPECT_EQ(206, response.status);
+    EXPECT_FALSE(response.errmsg);
+    EXPECT_EQ(Body, response.body);
 }
 
 TEST_F(WebTest, cookiesAreSent)
@@ -272,6 +317,51 @@ TEST_F(WebTest, onDataReceivedReportsByteCount)
     EXPECT_EQ(std::size(Body), total);
 }
 
+TEST_F(WebTest, responseBodyLimitReportsCurlError)
+{
+    static auto constexpr Body = "0123456789"sv;
+    static auto constexpr MaxFileSize = std::size_t{ 4 };
+    server_.setHandler([](evhttp_request* req) { LoopbackServer::reply(req, HTTP_OK, "OK", Body); });
+
+    auto opts = options();
+    opts.max_file_size = MaxFileSize;
+
+    auto const response = fetch(std::move(opts));
+    EXPECT_EQ(200, response.status);
+    EXPECT_TRUE(response.did_connect);
+    ASSERT_TRUE(response.errmsg);
+    EXPECT_FALSE(std::empty(*response.errmsg));
+    EXPECT_LT(std::size(response.body), std::size(Body));
+    EXPECT_LE(std::size(response.body), MaxFileSize);
+}
+
+TEST_F(WebTest, defaultResponseBodyLimitReportsCurlError)
+{
+    auto body = std::string(tr_web::FetchOptions::DefaultMaxFileSize + 1U, 'x');
+    server_.setHandler([&body](evhttp_request* req) { LoopbackServer::reply(req, HTTP_OK, "OK", body); });
+
+    auto const response = fetch(options());
+    EXPECT_EQ(200, response.status);
+    EXPECT_TRUE(response.did_connect);
+    ASSERT_TRUE(response.errmsg);
+    EXPECT_FALSE(std::empty(*response.errmsg));
+    EXPECT_LE(std::size(response.body), tr_web::FetchOptions::DefaultMaxFileSize);
+}
+
+TEST_F(WebTest, zeroMaxFileSizeDisablesLimit)
+{
+    auto body = std::string(tr_web::FetchOptions::DefaultMaxFileSize + 1U, 'x');
+    server_.setHandler([&body](evhttp_request* req) { LoopbackServer::reply(req, HTTP_OK, "OK", body); });
+
+    auto opts = options();
+    opts.max_file_size = 0U;
+
+    auto const response = fetch(std::move(opts));
+    EXPECT_EQ(200, response.status);
+    EXPECT_FALSE(response.errmsg);
+    EXPECT_EQ(std::size(body), std::size(response.body));
+}
+
 TEST_F(WebTest, timeoutIsReported)
 {
     // Handler that never replies, so the transfer exceeds the timeout.
@@ -283,6 +373,8 @@ TEST_F(WebTest, timeoutIsReported)
     auto const response = fetch(std::move(opts));
     EXPECT_EQ(0, response.status);
     EXPECT_TRUE(response.did_timeout);
+    ASSERT_TRUE(response.errmsg);
+    EXPECT_NE(std::string::npos, response.errmsg->find("curl error: "));
 }
 
 TEST_F(WebTest, destroyRightAfterFetchDoesNotHang)
@@ -295,6 +387,62 @@ TEST_F(WebTest, destroyRightAfterFetchDoesNotHang)
         auto web = tr_web::create(mediator_);
         fetch(*web, options());
     }
+}
+
+TEST_F(WebTest, redirectBodyBiggerThanRangeDoesNotAbort)
+{
+    static auto constexpr Body = "0123456789"sv;
+    static auto constexpr First = uint64_t{ 0 };
+    static auto constexpr Last = uint64_t{ 3 };
+
+    server_.setHandler([this](evhttp_request* req) {
+        if (auto const& path = server_.lastRequest().uri; path.ends_with("/redirect"sv)) {
+            static auto constexpr RedirectBody = "Moved permanently to /bigfile"sv;
+            static_assert(std::size(RedirectBody) > Last + 1U - First);
+            LoopbackServer::reply(
+                req,
+                HTTP_MOVEPERM,
+                "Moved Permanently",
+                RedirectBody,
+                { { { "Location", server_.url("/bigfile") } } });
+        } else if (path.ends_with("/bigfile"sv)) {
+            auto const range = server_.lastRequest().headers.at("range");
+            auto constexpr Prefix = "bytes="sv;
+            if (!range.starts_with(Prefix)) {
+                LoopbackServer::reply(req, HTTP_BADREQUEST, "Bad Request", {});
+                return;
+            }
+
+            auto const range_values = std::string_view{ range }.substr(Prefix.size());
+            auto const separator = range_values.find('-');
+            if (separator == std::string_view::npos) {
+                LoopbackServer::reply(req, HTTP_BADREQUEST, "Bad Request", {});
+                return;
+            }
+
+            auto first_remainder = std::string_view{};
+            auto const first = tr_num_parse<uint64_t>(range_values.substr(0, separator), &first_remainder);
+            auto last_remainder = std::string_view{};
+            auto const last = tr_num_parse<uint64_t>(range_values.substr(separator + 1U), &last_remainder);
+            if (!first || !last || !first_remainder.empty() || !last_remainder.empty() || *last < *first) {
+                LoopbackServer::reply(req, HTTP_BADREQUEST, "Bad Request", {});
+                return;
+            }
+
+            LoopbackServer::reply(req, 206, "Partial Content", Body.substr(*first, *last + 1U - *first));
+        } else {
+            LoopbackServer::reply(req, HTTP_NOTFOUND, "Not Found", ""sv);
+        }
+    });
+
+    auto opts = options("/redirect");
+    opts.range = std::make_pair(First, Last);
+
+    auto const response = fetch(std::move(opts));
+    EXPECT_EQ(206, response.status);
+    EXPECT_TRUE(response.did_connect);
+    EXPECT_FALSE(response.errmsg) << *response.errmsg;
+    EXPECT_EQ(Body.substr(First, Last + 1U - First), response.body);
 }
 
 } // namespace

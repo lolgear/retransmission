@@ -8,6 +8,9 @@
 #include <atomic>
 #include <chrono>
 #include <cstdint>
+#ifndef _WIN32
+#include <csignal>
+#endif
 #include <functional>
 #include <map>
 #include <mutex>
@@ -51,6 +54,11 @@ public:
         : base_{ event_base_new() }
         , http_{ evhttp_new(base_) }
     {
+#ifndef _WIN32
+        // The client may close a response-limited connection while libevent is still writing.
+        (void)signal(SIGPIPE, SIG_IGN);
+#endif
+
         evhttp_set_allowed_methods(
             http_,
             EVHTTP_REQ_GET | EVHTTP_REQ_POST | EVHTTP_REQ_HEAD | EVHTTP_REQ_PUT | EVHTTP_REQ_DELETE | EVHTTP_REQ_OPTIONS);
@@ -106,11 +114,22 @@ public:
         return request_;
     }
 
-    // Convenience: send a reply with the given status, reason and body.
-    static void reply(evhttp_request* req, int code, char const* reason, std::string_view body)
+    // Convenience: send a reply with the given status, reason, body, and headers.
+    static void reply(
+        evhttp_request* const req,
+        int const code,
+        char const* const reason,
+        std::string_view const body,
+        std::span<std::pair<std::string, std::string> const> headers = {})
     {
         auto* const out = evbuffer_new();
         evbuffer_add(out, std::data(body), std::size(body));
+        if (!headers.empty()) {
+            auto* const output_headers = evhttp_request_get_output_headers(req);
+            for (auto const& [key, value] : headers) {
+                evhttp_add_header(output_headers, key.c_str(), value.c_str());
+            }
+        }
         evhttp_send_reply(req, code, reason, out);
         evbuffer_free(out);
     }

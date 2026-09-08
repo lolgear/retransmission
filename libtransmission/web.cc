@@ -14,6 +14,7 @@
 #include <cstdint> // for uint64_t
 #include <functional> // for std::less()
 #include <list>
+#include <limits>
 #include <map>
 #include <memory>
 #include <ranges>
@@ -353,14 +354,26 @@ public:
             }
         }
 
-        void add_data(void const* data, size_t const n_bytes)
+        [[nodiscard]] bool add_data(void const* data, size_t const n_bytes)
         {
+            // Needed for curl < 8.4.0, newer versions handles this for us
+            if (auto const max = options().effective_max_file_size();
+                max != 0U && (response.body.size() > max || n_bytes > max - response.body.size())) {
+                tr_logAddWarn(
+                    fmt::format(
+                        fmt::runtime(_("Aborting request: response body exceeded max size of {max_file_size} bytes")),
+                        fmt::arg("max_file_size", max)));
+                return false;
+            }
+
             response.body.append(static_cast<char const*>(data), n_bytes);
             tr_logAddTrace(fmt::format("wrote {} bytes to task {}'s buffer", n_bytes, fmt::ptr(this)));
 
             if (options_.on_data_received) {
                 options_.on_data_received(n_bytes);
             }
+
+            return true;
         }
 
         void add_response_header(std::string_view line)
@@ -433,6 +446,13 @@ public:
         return in_range;
     }
 
+    // https://github.com/curl/curl/issues/14899
+    [[nodiscard]] static bool check_curl_gh14899() noexcept
+    {
+        static bool const in_range = get_curl_version() < 0x080a01 /* 8.10.1 */;
+        return in_range;
+    }
+
     static auto constexpr BandwidthPauseMsec = long{ 500 };
     static auto constexpr DnsCacheTimeoutSecs = long{ 60 * 60 };
     static auto constexpr MaxRedirects = long{ 10 };
@@ -445,6 +465,7 @@ public:
     bool const curl_ssl_verify = !tr_env_key_exists("TR_CURL_SSL_NO_VERIFY");
     bool const curl_proxy_ssl_verify = !tr_env_key_exists("TR_CURL_PROXY_SSL_NO_VERIFY");
     bool const curl_avoid_http2 = check_curl_gh10936() || check_curl_gh6312(); // both related to curl http2 bugs
+    bool const curl_dont_limit_range_requests = check_curl_gh14899();
 
     Mediator& mediator;
 
@@ -505,7 +526,7 @@ public:
         auto* task = static_cast<Task*>(vtask);
         TR_ASSERT(std::this_thread::get_id() == task->impl.curl_thread->get_id());
 
-        if (auto const range = task->options().range) {
+        if (task->options().range) {
             // https://curl.se/libcurl/c/CURLINFO_RESPONSE_CODE.html
             // "The stored value will be zero if no server response code has been received"
             static auto constexpr NoResponseCode = 0L;
@@ -540,7 +561,11 @@ public:
             }
         }
 
-        task->add_data(data, bytes_used);
+        if (!task->add_data(data, bytes_used)) {
+            // Tell curl to error out. Failed to add data to the buffer
+            return bytes_used + 1;
+        }
+
         return bytes_used;
     }
 
@@ -701,6 +726,17 @@ public:
 
         if (curl_avoid_http2) {
             (void)curl_easy_setopt(e, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        }
+
+        if (!curl_dont_limit_range_requests || !task.options().range) {
+            (void)curl_easy_setopt(
+                e,
+                CURLOPT_MAXFILESIZE_LARGE,
+                static_cast<curl_off_t>(std::min(
+                    task.options().effective_max_file_size(),
+                    static_cast<uint64_t>(std::numeric_limits<curl_off_t>::max()))));
+        } else {
+            // Rely on the write function to limit the size of range requests as a workaround for curl bug #14899.
         }
     }
 
