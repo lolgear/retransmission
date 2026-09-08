@@ -191,4 +191,9 @@ typedef struct PieceInfo {
     fRenderedHashString = self.torrent.hashString;
 }
 
+- (BOOL)acceptsFirstMouse:(NSEvent*)event
+{
+    return YES;
+}
+
 @end
