@@ -102,6 +102,10 @@ typedef NS_ENUM(NSUInteger, AddType) { //
                   beganTableUpdate:(BOOL*)beganTableUpdate;
 
 
+// In TorrentTableView
+- (void)toggleQuickLook;
+- (void)showInfo;
+
 
 - (void)setGroup:(id)sender; //used by delegate-generated menu items
 

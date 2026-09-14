@@ -1991,6 +1991,11 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
     [AboutWindowController.aboutController showWindow:nil];
 }
 
+- (void)showInfo
+{
+    [self showInfo:nil];
+}
+
 - (IBAction)showInfo:(id)sender
 {
     if (self.fInfoController.window.visible) {
@@ -4632,6 +4637,11 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
 - (void)applicationWillUnhide:(NSNotification*)notification
 {
     [self updateUI];
+}
+
+- (void)toggleQuickLook
+{
+    [self toggleQuickLook:nil];
 }
 
 - (IBAction)toggleQuickLook:(id)sender
