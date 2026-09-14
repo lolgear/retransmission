@@ -3,12 +3,10 @@
 // License text can be found in the licenses/ folder.
 
 #if __has_feature(modules)
-@import Carbon;
 @import UserNotifications;
 
 @import Sparkle;
 #else
-#import <Carbon/Carbon.h>
 #import <UserNotifications/UserNotifications.h>
 
 #import <Sparkle/Sparkle.h>
@@ -484,7 +482,7 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
 
         _fQuitRequested = NO;
 
-        _fPauseOnLaunch = (GetCurrentKeyModifiers() & (optionKey | rightOptionKey)) != 0;
+        _fPauseOnLaunch = (NSEvent.modifierFlags & NSEventModifierFlagOption) != 0;
     }
     return self;
 }
