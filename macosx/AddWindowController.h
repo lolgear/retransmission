@@ -21,18 +21,10 @@
     deleteTorrentCheckEnableInitially:(BOOL)deleteTorrent
                       canToggleDelete:(BOOL)canToggleDelete;
 
-- (IBAction)setDestination:(id)sender;
 
-- (IBAction)add:(id)sender;
-- (IBAction)cancelAdd:(id)sender;
 
-- (IBAction)setFileFilterText:(id)sender;
-- (IBAction)checkAll:(id)sender;
-- (IBAction)uncheckAll:(id)sender;
 
-- (IBAction)verifyLocalData:(id)sender;
 
-- (IBAction)changePriority:(id)sender;
 
 - (void)updateCheckButtons:(NSNotification*)notification;
 

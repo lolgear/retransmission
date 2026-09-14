@@ -29,9 +29,7 @@ extern CGFloat const kGroupSeparatorHeight;
 
 - (void)toggleGroupRowRatio;
 
-- (IBAction)toggleControlForTorrent:(id)sender;
 
-- (IBAction)displayTorrentActionPopover:(id)sender;
 
 - (void)togglePiecesBar;
 @property(nonatomic, readonly) CGFloat piecesBarPercent;

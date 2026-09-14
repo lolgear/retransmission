@@ -17,7 +17,5 @@
                      modalForWindow:(NSWindow*)window
                   completionHandler:(void (^)(BOOL didRename))completionHandler;
 
-- (IBAction)rename:(id)sender;
-- (IBAction)cancelRename:(id)sender;
 
 @end

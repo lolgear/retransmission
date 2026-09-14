@@ -6,9 +6,5 @@
 
 @interface GroupsPrefsController : NSObject
 
-- (IBAction)toggleUseAutoAssignRules:(id)sender;
-- (IBAction)orderFrontRulesSheet:(id)sender;
-- (IBAction)cancelRules:(id)sender;
-- (IBAction)saveRules:(id)sender;
 
 @end

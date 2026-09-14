@@ -8,6 +8,5 @@
 
 @property(nonatomic, class, readonly) StatsWindowController* statsWindow;
 
-- (IBAction)resetStats:(id)sender;
 
 @end

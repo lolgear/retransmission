@@ -13,12 +13,8 @@
 
 - (instancetype)initWithTorrent:(Torrent*)torrent destination:(NSString*)path controller:(Controller*)controller;
 
-- (IBAction)setDestination:(id)sender;
 
-- (IBAction)add:(id)sender;
-- (IBAction)cancelAdd:(id)sender;
 
-- (IBAction)changePriority:(id)sender;
 
 - (void)updateGroupMenu:(NSNotification*)notification;
 
