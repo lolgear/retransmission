@@ -337,7 +337,6 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
 
 @property(nonatomic) BOOL fGlobalPopoverShown;
 @property(nonatomic) NSView* fPositioningView;
-@property(nonatomic) BOOL fSoundPlaying;
 
 - (void)removeTorrentsImpl:(NSArray<Torrent*>*)torrents deleteData:(BOOL)deleteData;
 
@@ -462,7 +461,6 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
 
         _fQuitting = NO;
         _fGlobalPopoverShown = NO;
-        _fSoundPlaying = NO;
 
         tr_sessionSetAltSpeedFunc(_fLib, [controller = self](bool const active, bool const by_user) {
             NSDictionary* const dict = @{ @"Active" : @(active), @"ByUser" : @(by_user) };
@@ -2209,11 +2207,9 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
     Torrent* torrent = notification.object;
 
     if ([notification.userInfo[@"WasRunning"] boolValue]) {
-        if (!self.fSoundPlaying && [self.fDefaults boolForKey:@"PlayDownloadSound"]) {
-            NSSound* sound;
-            if ((sound = [NSSound soundNamed:[self.fDefaults stringForKey:@"DownloadSound"]])) {
-                sound.delegate = self;
-                self.fSoundPlaying = YES;
+        if ([self.fDefaults boolForKey:@"PlayDownloadSound"]) {
+            NSSound* sound = [NSSound soundNamed:[self.fDefaults stringForKey:@"DownloadSound"]];
+            if (sound && !sound.isPlaying) {
                 [sound play];
             }
         }
@@ -2258,10 +2254,8 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
     Torrent* torrent = notification.object;
 
     if (!self.fSoundPlaying && [self.fDefaults boolForKey:@"PlaySeedingSound"]) {
-        NSSound* sound;
-        if ((sound = [NSSound soundNamed:[self.fDefaults stringForKey:@"SeedingSound"]])) {
-            sound.delegate = self;
-            self.fSoundPlaying = YES;
+        NSSound* sound = [NSSound soundNamed:[self.fDefaults stringForKey:@"SeedingSound"]];
+        if (sound && !sound.isPlaying) {
             [sound play];
         }
     }
@@ -3023,11 +3017,6 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
         UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:identifier content:content trigger:nil];
         [UNUserNotificationCenter.currentNotificationCenter addNotificationRequest:request withCompletionHandler:nil];
     }
-}
-
-- (void)sound:(NSSound*)sound didFinishPlaying:(BOOL)finishedPlaying
-{
-    self.fSoundPlaying = NO;
 }
 
 - (void)VDKQueue:(VDKQueue*)queue receivedNotification:(NSString*)notification forPath:(NSString*)fpath
