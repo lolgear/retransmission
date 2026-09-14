@@ -48,7 +48,6 @@ typedef NS_ENUM(NSUInteger, AddType) { //
 
 @property(nonatomic, readonly) tr_session* sessionHandle;
 
-
 - (void)resumeTorrents:(NSArray<Torrent*>*)torrents;
 
 - (void)resumeTorrentsNoWait:(NSArray<Torrent*>*)torrents;
@@ -58,21 +57,15 @@ typedef NS_ENUM(NSUInteger, AddType) { //
 - (void)removeTorrents:(NSArray<Torrent*>*)torrents deleteData:(BOOL)deleteData;
 - (void)confirmRemoveTorrents:(NSArray<Torrent*>*)torrents deleteData:(BOOL)deleteData;
 
-
 - (void)moveDataFiles:(NSArray<Torrent*>*)torrents;
 
 - (void)copyTorrentFileForTorrents:(NSMutableArray<Torrent*>*)torrents;
-
-
-
-
 
 - (void)verifyTorrents:(NSArray<Torrent*>*)torrents;
 
 @property(nonatomic, readonly) NSArray<Torrent*>* selectedTorrents;
 
 @property(nonatomic, readonly) PrefsController* prefsController;
-
 
 - (void)resetInfo;
 
@@ -101,11 +94,9 @@ typedef NS_ENUM(NSUInteger, AddType) { //
                withSortDescriptors:(NSArray*)descriptors
                   beganTableUpdate:(BOOL*)beganTableUpdate;
 
-
 // In TorrentTableView
 - (void)toggleQuickLook;
 - (void)showInfo;
-
 
 - (void)setGroup:(id)sender; //used by delegate-generated menu items
 
@@ -119,7 +110,6 @@ typedef NS_ENUM(NSUInteger, AddType) { //
 @property(nonatomic, readonly) VDKQueue* fileWatcherQueue;
 
 - (void)torrentTableViewSelectionDidChange:(NSNotification*)notification;
-
 
 - (void)focusFilterField;
 
@@ -139,9 +129,6 @@ typedef NS_ENUM(NSUInteger, AddType) { //
 @property(nonatomic, getter=isFullScreen, readonly) BOOL fullScreen;
 
 - (void)updateForExpandCollapse;
-
-
-
 
 - (void)rpcCallback:(tr_rpc_callback_type)type forTorrentId:(std::optional<tr_torrent_id_t>)torrentId;
 - (void)rpcAddTorrentStruct:(struct tr_torrent*)torrentStruct;

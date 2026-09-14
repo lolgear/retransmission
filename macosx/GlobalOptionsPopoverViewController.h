@@ -10,9 +10,4 @@
 
 - (instancetype)initWithHandle:(tr_session*)handle;
 
-
-
-
-
-
 @end

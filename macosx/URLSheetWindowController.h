@@ -10,5 +10,4 @@
 
 - (instancetype)init;
 
-
 @end

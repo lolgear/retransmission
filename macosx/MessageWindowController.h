@@ -6,6 +6,4 @@
 
 @interface MessageWindowController : NSWindowController
 
-
-
 @end

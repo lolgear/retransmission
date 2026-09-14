@@ -6,5 +6,4 @@
 
 @interface GroupsPrefsController : NSObject
 
-
 @end

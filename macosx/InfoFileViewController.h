@@ -16,7 +16,6 @@
 
 - (void)saveViewSize;
 
-
 - (NSRect)quickLookSourceFrameForPreviewItem:(id<QLPreviewItem>)item;
 
 @end

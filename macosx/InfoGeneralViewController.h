@@ -11,5 +11,4 @@
 - (void)setInfoForTorrents:(NSArray<Torrent*>*)torrents;
 - (void)updateInfo;
 
-
 @end

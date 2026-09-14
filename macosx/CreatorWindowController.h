@@ -13,7 +13,6 @@
 
 - (instancetype)initWithHandle:(tr_session*)handle path:(NSURL*)path;
 
-
 - (void)copy:(id)sender;
 - (void)paste:(id)sender;
 

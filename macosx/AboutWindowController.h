@@ -8,5 +8,4 @@
 
 @property(nonatomic, class, readonly) AboutWindowController* aboutController;
 
-
 @end

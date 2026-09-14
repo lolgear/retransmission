@@ -10,7 +10,6 @@
 
 + (void)downloadWithPrefsController:(PrefsController*)prefsController;
 
-
 - (void)setStatusStarting;
 
 - (void)setFinished;

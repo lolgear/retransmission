@@ -21,7 +21,6 @@
 - (void)uncheckAll;
 - (void)setPriority:(id)sender;
 
-
 - (void)renameSelected:(id)sender;
 
 @end

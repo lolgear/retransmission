@@ -17,5 +17,4 @@
                      modalForWindow:(NSWindow*)window
                   completionHandler:(void (^)(BOOL didRename))completionHandler;
 
-
 @end

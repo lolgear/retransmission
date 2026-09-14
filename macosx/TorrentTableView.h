@@ -29,8 +29,6 @@ extern CGFloat const kGroupSeparatorHeight;
 
 - (void)toggleGroupRowRatio;
 
-
-
 - (void)togglePiecesBar;
 @property(nonatomic, readonly) CGFloat piecesBarPercent;
 

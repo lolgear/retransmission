@@ -21,11 +21,6 @@
     deleteTorrentCheckEnableInitially:(BOOL)deleteTorrent
                       canToggleDelete:(BOOL)canToggleDelete;
 
-
-
-
-
-
 - (void)updateCheckButtons:(NSNotification*)notification;
 
 - (void)updateGroupMenu:(NSNotification*)notification;

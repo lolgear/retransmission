@@ -16,7 +16,6 @@
 - (void)updateInfoStats;
 - (void)updateOptions;
 
-
 - (void)setNextTab;
 - (void)setPreviousTab;
 

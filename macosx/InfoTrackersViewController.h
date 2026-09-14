@@ -14,5 +14,4 @@
 - (void)saveViewSize;
 - (void)clearView;
 
-
 @end
