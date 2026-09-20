@@ -748,6 +748,9 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
         [BonjourController.defaultController startWithPort:static_cast<int>([self.fDefaults integerForKey:@"RPCPort"])];
     }
 
+    //cleaning up outdated settings
+    [_fDefaults removeObjectForKey:@"AutoSize"];
+
     //shamelessly ask for donations
     if ([self.fDefaults boolForKey:@"WarningDonate"]) {
         BOOL const firstLaunch = tr_sessionGetCumulativeStats(self.fLib).sessionCount <= 1;

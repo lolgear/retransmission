@@ -1037,11 +1037,6 @@ static NSString* const kWebUIURLFormat = @"http://localhost:%ld/";
     }];
 }
 
-#warning delete method and related component (AutoSize) from XIB
-- (void)setAutoSize:(id)sender
-{
-}
-
 - (IBAction)setRPCEnabled:(id)sender
 {
     BOOL enable = [self.fDefaults boolForKey:@"RPC"];
