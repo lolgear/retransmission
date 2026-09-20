@@ -1052,15 +1052,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		0AD81F53304EC83D00C22874 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+		0AD81F53304EC83D00C22874 /* Exceptions for "macosx" folder in "Transmission" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			attributesByRelativePath = {
-				Sparkle.framework = (
-					Weak,
-				);
+				Sparkle.framework = (Weak, );
 			};
 			membershipExceptions = (
-				/Localized/QuickLookExtension/Localizable.strings,
+				"/Localized: QuickLookExtension/Localizable.strings",
 				CMakeLists.txt,
 				Info.plist,
 				Info.plist.in,
@@ -1073,11 +1071,11 @@
 			);
 			target = 8D1107260486CEB800E47090 /* Transmission */;
 		};
-		0AD81F55304EC83D00C22874 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+		0AD81F55304EC83D00C22874 /* Exceptions for "macosx" folder in "QuickLookExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				/Localized/QuickLookExtension/Localizable.strings,
-				Additions/NSStringAdditions.mm,
+				"/Localized: QuickLookExtension/Localizable.strings",
+				NSStringAdditions.mm,
 				QuickLookExtension/PreviewProvider.mm,
 				QuickLookExtension/style.css,
 			);
@@ -1086,12 +1084,10 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		0AD81F54304EC83D00C22874 /* PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet */ = {
+		0AD81F54304EC83D00C22874 /* Exceptions for "macosx" folder in "Copy Files to Frameworks" phase from "Transmission" target */ = {
 			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
 			attributesByRelativePath = {
-				Sparkle.framework = (
-					CodeSignOnCopy,
-				);
+				Sparkle.framework = (CodeSignOnCopy, );
 			};
 			buildPhase = A24F191B0A3A792300C9C145 /* Copy Files to Frameworks */;
 			membershipExceptions = (
@@ -1101,7 +1097,19 @@
 /* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		0AD81ED4304EC83C00C22874 /* macosx */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (0AD81F53304EC83D00C22874 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 0AD81F54304EC83D00C22874 /* PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet */, 0AD81F55304EC83D00C22874 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (TransmissionHelp, ); path = macosx; sourceTree = "<group>"; };
+		0AD81ED4304EC83C00C22874 /* macosx */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				0AD81F53304EC83D00C22874 /* Exceptions for "macosx" folder in "Transmission" target */,
+				0AD81F54304EC83D00C22874 /* Exceptions for "macosx" folder in "Copy Files to Frameworks" phase from "Transmission" target */,
+				0AD81F55304EC83D00C22874 /* Exceptions for "macosx" folder in "QuickLookExtension" target */,
+			);
+			explicitFolders = (
+				TransmissionHelp,
+			);
+			path = macosx;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -3260,7 +3268,7 @@
 				CODE_SIGN_ENTITLEMENTS = macosx/Transmission.entitlements;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
-					macosx,
+					"$(inherited)",
 					"$(PROJECT_DIR)/macosx",
 				);
 				HEADER_SEARCH_PATHS = (
@@ -3534,7 +3542,7 @@
 				CODE_SIGN_ENTITLEMENTS = macosx/Transmission.entitlements;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
-					macosx,
+					"$(inherited)",
 					"$(PROJECT_DIR)/macosx",
 				);
 				HEADER_SEARCH_PATHS = (
@@ -3799,7 +3807,7 @@
 				CODE_SIGN_ENTITLEMENTS = macosx/Transmission.entitlements;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
-					macosx,
+					"$(inherited)",
 					"$(PROJECT_DIR)/macosx",
 				);
 				HEADER_SEARCH_PATHS = (
