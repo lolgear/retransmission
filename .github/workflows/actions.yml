@@ -186,6 +186,7 @@ jobs:
             -DUSE_SYSTEM_DEFAULT=ON \
             -DUSE_SYSTEM_ARCHIVE=OFF `# Build vendored libarchive here to exercise its ExternalProject scripts on Linux` \
             -DUSE_SYSTEM_DHT=OFF `# Not packaged in Ubuntu` \
+            -DUSE_SYSTEM_FMT=AUTO `# distro may not have fmt >= FMT_MINIMUM` \
             -DUSE_SYSTEM_SIGSLOT=OFF `# Not packaged in Ubuntu` \
             -DUSE_SYSTEM_SIMDUTF=OFF `# TODO: YES in 26.04` \
             -DUSE_SYSTEM_SMALL=OFF `# Not packaged in Ubuntu` \
@@ -375,7 +376,6 @@ jobs:
     # clang-tidy can parse every TU, but never compiles the whole target;
     # ctcache caches per-TU results across runs. The matrix.enabled flag (wired
     # to the what-to-make tidy-* outputs) skips cells whose area did not change.
-    # TODO: try removing '-DFMT_USE_CONSTEVAL=0' either when upgrading clang or fmt
     strategy:
       fail-fast: false
       matrix:
@@ -456,8 +456,8 @@ jobs:
             -DENABLE_TESTS=${{ matrix.enable-tests && 'ON' || 'OFF' }} \
             -DRUN_CLANG_TIDY=OFF \
             -DUSE_SYSTEM_DEFAULT=ON \
-            -DUSE_SYSTEM_FMT=${{ matrix.toolkit == 'gtk4' && 'OFF' || 'ON' }} `# TODO: remove this line when fmt>10 or clang>20` \
             -DUSE_SYSTEM_DHT=OFF `# Not packaged in Ubuntu` \
+            -DUSE_SYSTEM_FMT=AUTO `# distro may not have fmt >= FMT_MINIMUM` \
             -DUSE_SYSTEM_SIGSLOT=OFF `# Not packaged in Ubuntu` \
             -DUSE_SYSTEM_SIMDUTF=OFF `# TODO: YES in 26.04` \
             -DUSE_SYSTEM_SMALL=OFF `# Not packaged in Ubuntu` \
@@ -484,7 +484,6 @@ jobs:
           regex: ${{ matrix.regex }}
           cache-key: ${{ github.job }}-${{ matrix.toolkit }}
           clang-tidy-binary: clang-tidy-22
-          extra-arg: '-DFMT_USE_CONSTEVAL=0'
 
   clang-tidy-windows:
     runs-on: windows-2025
@@ -1109,6 +1108,7 @@ jobs:
             -DUSE_SYSTEM_GTEST=ON \
             -DUSE_SYSTEM_DEFAULT=ON \
             -DUSE_SYSTEM_DHT=OFF \
+            -DUSE_SYSTEM_FMT=AUTO `# distro may not have fmt >= FMT_MINIMUM` \
             -DUSE_SYSTEM_SIGSLOT=OFF \
             -DUSE_SYSTEM_SIMDUTF=OFF `# TODO: YES in sid` \
             -DUSE_SYSTEM_SMALL=OFF \
@@ -1287,6 +1287,7 @@ jobs:
             -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=mold \
             -DUSE_SYSTEM_DEFAULT=ON \
             -DUSE_SYSTEM_DHT=OFF `# Not packaged in Ubuntu` \
+            -DUSE_SYSTEM_FMT=AUTO `# distro may not have fmt >= FMT_MINIMUM` \
             -DUSE_SYSTEM_SIGSLOT=OFF `# Not packaged in Ubuntu` \
             -DUSE_SYSTEM_SIMDUTF=OFF `# TODO: YES in 26.04` \
             -DUSE_SYSTEM_SMALL=OFF `# Not packaged in Ubuntu` \
@@ -1427,6 +1428,7 @@ jobs:
             -DRUN_CLANG_TIDY=OFF \
             -DUSE_SYSTEM_DEFAULT=ON \
             -DUSE_SYSTEM_DHT=OFF `# Not packaged in Ubuntu` \
+            -DUSE_SYSTEM_FMT=AUTO `# distro may not have fmt >= FMT_MINIMUM` \
             -DUSE_SYSTEM_SIGSLOT=OFF `# Not packaged in Ubuntu` \
             -DUSE_SYSTEM_SIMDUTF=OFF `# TODO: YES in 26.04` \
             -DUSE_SYSTEM_SMALL=OFF `# Not packaged in Ubuntu` \
@@ -1502,6 +1504,7 @@ jobs:
             -DRUN_CLANG_TIDY=OFF \
             -DUSE_SYSTEM_DEFAULT=ON \
             -DUSE_SYSTEM_DHT=OFF `# Not packaged in Ubuntu` \
+            -DUSE_SYSTEM_FMT=AUTO `# distro may not have fmt >= FMT_MINIMUM` \
             -DUSE_SYSTEM_SIGSLOT=OFF `# Not packaged in Ubuntu` \
             -DUSE_SYSTEM_SIMDUTF=OFF `# TODO: YES in 26.04` \
             -DUSE_SYSTEM_SMALL=OFF `# Not packaged in Ubuntu` \
@@ -1677,6 +1680,7 @@ jobs:
             -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=mold \
             -DUSE_SYSTEM_DEFAULT=ON \
             -DUSE_SYSTEM_DHT=OFF `# Not packaged in Ubuntu` \
+            -DUSE_SYSTEM_FMT=AUTO `# distro may not have fmt >= FMT_MINIMUM` \
             -DUSE_SYSTEM_SIGSLOT=OFF `# Not packaged in Ubuntu` \
             -DUSE_SYSTEM_SIMDUTF=OFF `# TODO: YES in 26.04` \
             -DUSE_SYSTEM_SMALL=OFF `# Not packaged in Ubuntu` \
