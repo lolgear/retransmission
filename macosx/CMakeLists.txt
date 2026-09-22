@@ -313,8 +313,10 @@ set_source_files_properties(
         MACOSX_PACKAGE_LOCATION Resources)
 
 set(LINGUAS
+    af
     da
     de
+    el
     en
     es
     eu
@@ -332,7 +334,8 @@ set(LINGUAS
     tr
     uk
     zh-CN
-    zh-TW)
+    zh-TW
+    )
 
 if(ENABLE_NLS)
     set(ENABLED_LINGUAS ${LINGUAS})
