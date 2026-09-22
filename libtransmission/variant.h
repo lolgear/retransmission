@@ -495,6 +495,8 @@ public:
     // When set, assumes that the `input` passed to parse() is valid
     // for the lifespan of the variant and we can use string_views of
     // `input` instead of cloning new strings.
+    // Only the benc parser can do this; the JSON parser always copies
+    // because it unescapes strings into a scratch buffer.
     constexpr tr_variant_serde& inplace() noexcept
     {
         parse_inplace_ = true;
@@ -568,8 +570,6 @@ bool save(std::string_view filename, Settings const& settings);
 
 // Deprecated C API. Do not use.
 bool tr_variantDictFindDict(tr_variant* var, tr_quark key, tr_variant** setme_value);
-bool tr_variantDictFindList(tr_variant* var, tr_quark key, tr_variant** setme);
 tr_variant* tr_variantDictAddDict(tr_variant* var, tr_quark key, size_t n_reserve);
 tr_variant* tr_variantDictFind(tr_variant* var, tr_quark key);
-tr_variant* tr_variantListChild(tr_variant* var, size_t pos);
 void tr_variantMergeDicts(tr_variant* tgt, tr_variant const* src);

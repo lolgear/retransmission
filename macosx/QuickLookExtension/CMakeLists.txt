@@ -8,8 +8,10 @@ target_sources(${TR_NAME}-mac-qlappex
         PreviewProvider.mm)
 
 set(LINGUAS
+    af
     da
     de
+    el
     en
     es
     eu

@@ -190,6 +190,7 @@ target_sources(${TR_NAME}
         values.cc
         values.h
         variant-benc.cc
+        variant-common.h
         variant-json.cc
         variant.cc
         variant.h
@@ -268,8 +269,8 @@ tr_target_compile_definitions_for_functions(${TR_NAME}
 
 target_include_directories(${TR_NAME}
     PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/..
         ${CMAKE_CURRENT_BINARY_DIR}/..
+        ${CMAKE_CURRENT_SOURCE_DIR}/..
         ${Intl_INCLUDE_DIRS})
 
 if(ANDROID)
@@ -316,22 +317,30 @@ if(INSTALL_LIB)
         DESTINATION ${CMAKE_INSTALL_LIBDIR})
     install(
         FILES
+            announce-list.h
+            block-info.h
+            constants.h
+            digest.h
             error-types.h
             error.h
             file.h
             log.h
+            macros.h
             makemeta.h
+            net.h
             quark.h
             rpcimpl.h
             session-id.h
+            shared-string.h
             timer-ev.h
             timer.h
+            torrent-files.h
             tr-assert.h
             tr-buffer.h
             tr-getopt.h
-            macros.h
             tr-strbuf.h
             transmission.h
+            types.h
             utils.h
             values.h
             variant.h

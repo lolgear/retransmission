@@ -14,6 +14,7 @@
 
 #include "libtransmission/local-data.h"
 
+#include "libtransmission/constants.h"
 #include "libtransmission/crypto-utils.h"
 #include "libtransmission/error.h"
 #include "libtransmission/inout.h"
@@ -96,7 +97,7 @@ public:
         }
 
         auto const len = byte_span.size();
-        if (len > tr_block_info::BlockSize) {
+        if (len > TrBlockSize) {
             return TR_ERROR_EINVAL;
         }
         auto const span_size = static_cast<size_t>(len);
@@ -156,7 +157,6 @@ public:
 
     [[nodiscard]] tr_error_code_t move(
         tr_torrent_id_t const id,
-        std::string_view const old_parent,
         std::string_view const parent,
         std::string_view const parent_name) override
     {
@@ -166,7 +166,7 @@ public:
         }
 
         auto error = tr_error{};
-        if (tor->files().move(old_parent, parent, parent_name, &error)) {
+        if (tor->files().move(tor->search_paths(), parent, parent_name, &error)) {
             return 0;
         }
 
@@ -185,7 +185,7 @@ public:
         }
 
         auto error = tr_error{};
-        tor->files().remove(tor->current_dir().sv(), tor->name(), remove_func, &error);
+        tor->files().remove(tor->search_paths(), tor->name(), remove_func, &error);
         return error ? error.code() : 0;
     }
 
@@ -307,13 +307,12 @@ void LocalData::close_all()
 
 void LocalData::move(
     tr_torrent_id_t const id,
-    std::string_view const old_parent,
     std::string_view const parent,
     std::string_view const parent_name,
     OnMove on_move) // NOLINT(performance-unnecessary-value-param)
 {
     drain();
-    auto const err = backend_->move(id, old_parent, parent, parent_name);
+    auto const err = backend_->move(id, parent, parent_name);
 
     if (on_move) {
         std::move(on_move)(id, make_error(err));

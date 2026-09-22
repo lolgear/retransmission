@@ -10,6 +10,7 @@
 #include <cstdint> // int64_t
 #include <map>
 #include <optional>
+#include <span>
 #include <string>
 #include <type_traits>
 
@@ -18,8 +19,6 @@
 #include <QtCore/QObject>
 #include <QtCore/QString>
 #include <QtCore/QTimer>
-
-#include <QtNetwork/QNetworkReply>
 
 #include <libtransmission/converters.h>
 #include <libtransmission/quark.h>
@@ -146,12 +145,12 @@ signals:
     void sessionUpdated();
     void blocklistUpdated(qint64);
     void blocklistUpdateFailed(QString const& message);
-    void torrentsUpdated(tr_variant* torrent_list, bool complete_list);
-    void torrentsRemoved(tr_variant* torrent_list);
+    void torrentsUpdated(std::span<tr_variant const> torrents, bool complete_list);
+    void torrentsRemoved(std::span<tr_variant const> torrent_ids);
     void sessionCalled(Tag);
     void dataReadProgress();
     void dataSendProgress();
-    void networkResponse(QNetworkReply::NetworkError code, QString const& message);
+    void networkResponse(bool is_network_error, QString const& message);
     void httpAuthenticationRequired();
 
 private slots:
