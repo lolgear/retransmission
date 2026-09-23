@@ -30,7 +30,6 @@ add_link_options(
     # equivalent of XCODE_ATTRIBUTE_DEAD_CODE_STRIPPING YES for this directory
     $<$<LINK_LANGUAGE:C,CXX>:-dead_strip>)
 
-add_subdirectory(QuickLookExtension)
 add_subdirectory(VDKQueue)
 
 add_executable(${TR_NAME}-mac MACOSX_BUNDLE)
@@ -209,7 +208,7 @@ set(XIB_FILES
 set(RESOURCES
     Defaults.plist
     Credits.rtf
-    ../COPYING
+    ../../COPYING
     Images/TransmissionDocument.icns)
 source_group(Resources
     FILES ${RESOURCES})
@@ -395,7 +394,7 @@ tr_target_xib_files(${TR_NAME}-mac
     ${BASE_XIB_FILES})
 
 find_library(SPARKLE_FRAMEWORK Sparkle
-    PATHS ${CMAKE_CURRENT_SOURCE_DIR}
+    PATHS ${CMAKE_CURRENT_SOURCE_DIR}/..
     NO_DEFAULT_PATHS)
 
 target_link_libraries(${TR_NAME}-mac
