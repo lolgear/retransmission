@@ -3270,7 +3270,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/macosx",
+					"$(PROJECT_DIR)/macosx/Transmission",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3545,7 +3545,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/macosx",
+					"$(PROJECT_DIR)/macosx/Transmission",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3811,7 +3811,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/macosx",
+					"$(PROJECT_DIR)/macosx/Transmission",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
