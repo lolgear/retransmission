@@ -394,7 +394,7 @@ tr_target_xib_files(${TR_NAME}-mac
     ${BASE_XIB_FILES})
 
 find_library(SPARKLE_FRAMEWORK Sparkle
-    PATHS ${CMAKE_CURRENT_SOURCE_DIR}/..
+    PATHS ${CMAKE_CURRENT_SOURCE_DIR}
     NO_DEFAULT_PATHS)
 
 target_link_libraries(${TR_NAME}-mac
