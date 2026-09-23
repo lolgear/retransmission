@@ -717,10 +717,10 @@
 		A25964A4106D73A800453B31 /* announcer.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = announcer.cc; sourceTree = "<group>"; };
 		A25964A5106D73A800453B31 /* announcer.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = announcer.h; sourceTree = "<group>"; };
 		A25BFD63167BED3B0039D1AA /* variant-benc.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "variant-benc.cc"; sourceTree = "<group>"; };
-		A25BFD70167BED3B0039D1AA /* variant-common.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = "variant-common.h"; sourceTree = "<group>"; };
 		A25BFD65167BED3B0039D1AA /* variant-json.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "variant-json.cc"; sourceTree = "<group>"; };
 		A25BFD67167BED3B0039D1AA /* variant.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = variant.cc; sourceTree = "<group>"; };
 		A25BFD68167BED3B0039D1AA /* variant.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = variant.h; sourceTree = "<group>"; };
+		A25BFD70167BED3B0039D1AA /* variant-common.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = "variant-common.h"; sourceTree = "<group>"; };
 		A25D2CBA0CF4C7190096A262 /* stats.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = stats.h; sourceTree = "<group>"; };
 		A25D2CBB0CF4C7190096A262 /* stats.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = stats.cc; sourceTree = "<group>"; };
 		A25E03E00E4015380086C225 /* tr-getopt.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = "tr-getopt.h"; sourceTree = "<group>"; };
@@ -1059,15 +1059,15 @@
 			};
 			membershipExceptions = (
 				"/Localized: QuickLookExtension/Localizable.strings",
-				CMakeLists.txt,
-				Info.plist,
-				Info.plist.in,
 				QuickLookExtension/CMakeLists.txt,
 				QuickLookExtension/Info.plist,
 				QuickLookExtension/Info.plist.in,
 				QuickLookExtension/PreviewProvider.mm,
 				QuickLookExtension/style.css,
-				VDKQueue/CMakeLists.txt,
+				Transmission/CMakeLists.txt,
+				Transmission/Info.plist,
+				Transmission/Info.plist.in,
+				Transmission/VDKQueue/CMakeLists.txt,
 			);
 			target = 8D1107260486CEB800E47090 /* Transmission */;
 		};
@@ -1075,9 +1075,9 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"/Localized: QuickLookExtension/Localizable.strings",
-				NSStringAdditions.mm,
 				QuickLookExtension/PreviewProvider.mm,
 				QuickLookExtension/style.css,
+				Transmission/NSStringAdditions.mm,
 			);
 			target = ED5E0E7B2CD30B180071433B /* QuickLookExtension */;
 		};
@@ -1105,7 +1105,7 @@
 				0AD81F55304EC83D00C22874 /* Exceptions for "macosx" folder in "QuickLookExtension" target */,
 			);
 			explicitFolders = (
-				TransmissionHelp,
+				Transmission/TransmissionHelp,
 			);
 			path = macosx;
 			sourceTree = "<group>";
