@@ -134,8 +134,6 @@ target_sources(${TR_NAME}-mac
         NSStringAdditions.mm
         PeerProgressIndicatorCell.h
         PeerProgressIndicatorCell.mm
-        PeerTableView.h
-        PeerTableView.mm
         PiecesView.h
         PiecesView.mm
         PortChecker.h
