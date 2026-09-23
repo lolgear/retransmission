@@ -32,7 +32,6 @@ typedef NS_ENUM(NSUInteger, AddType) { //
 
 - (void)askOpenConfirmed:(AddWindowController*)addController add:(BOOL)add;
 - (void)openCreatedFile:(NSNotification*)notification;
-- (void)openFilesWithDict:(NSDictionary*)dictionary;
 
 - (void)openMagnet:(NSString*)address;
 - (void)askOpenMagnetConfirmed:(AddMagnetWindowController*)addController add:(BOOL)add;
