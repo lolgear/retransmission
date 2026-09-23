@@ -60,17 +60,15 @@ NSString* generateIconData(UTType* type, NSUInteger width, NSMutableDictionary<N
     return [@"cid:" stringByAppendingString:iconFileName];
 }
 
-// Optimized version of `NSStringAdditions -stringForFileSize:` for external process with rigid memory limits.
-NSString* stringForFileSize(uint64_t size)
+// One shared formatter. +[NSByteCountFormatter stringFromByteCount:countStyle:]
+// builds a fresh formatter per call, and the file table calls this once per file.
+// Sizes above 9.22 EB are unsupported because stringFromByteCount: takes a long long.
+[[nodiscard]]
+static NSString* stringForFileSize(uint64_t const size)
 {
-    static NSByteCountFormatter* formatter;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        formatter = [[NSByteCountFormatter alloc] init];
-        formatter.countStyle = NSByteCountFormatterCountStyleFile;
-    });
-
-    return [formatter stringFromByteCount:size];
+    // countStyle defaults to NSByteCountFormatterCountStyleFile.
+    static auto* const fmt = [[NSByteCountFormatter alloc] init];
+    return [fmt stringFromByteCount:static_cast<long long>(size)];
 }
 
 @implementation PreviewProvider
