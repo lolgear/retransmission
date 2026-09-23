@@ -408,7 +408,6 @@ target_link_libraries(${TR_NAME}-mac
         vdkqueue
         ${SPARKLE_FRAMEWORK}
         "-framework AppKit"
-        "-framework Carbon"
         "-framework Foundation"
         "-framework Quartz"
         "-framework Security"
