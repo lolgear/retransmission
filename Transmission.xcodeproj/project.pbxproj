@@ -1054,9 +1054,6 @@
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		0AD81F53304EC83D00C22874 /* Exceptions for "macosx" folder in "Transmission" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			attributesByRelativePath = {
-				Sparkle.framework = (Weak, );
-			};
 			membershipExceptions = (
 				"/Localized: QuickLookExtension/Localizable.strings",
 				CMakeLists.txt,
@@ -1085,14 +1082,14 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		0AD81F54304EC83D00C22874 /* Exceptions for "macosx" folder in "Copy Files to Frameworks" phase from "Transmission" target */ = {
+		0AFD929730648B1F00848CD4 /* Exceptions for "macosx" folder in "Copy Files to Frameworks" phase from "Transmission" target */ = {
 			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
 			attributesByRelativePath = {
-				Sparkle.framework = (CodeSignOnCopy, );
+				Transmission/Sparkle.framework = (CodeSignOnCopy, RemoveHeadersOnCopy, );
 			};
 			buildPhase = A24F191B0A3A792300C9C145 /* Copy Files to Frameworks */;
 			membershipExceptions = (
-				Sparkle.framework,
+				Transmission/Sparkle.framework,
 			);
 		};
 /* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
@@ -1102,7 +1099,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				0AD81F53304EC83D00C22874 /* Exceptions for "macosx" folder in "Transmission" target */,
-				0AD81F54304EC83D00C22874 /* Exceptions for "macosx" folder in "Copy Files to Frameworks" phase from "Transmission" target */,
+				0AFD929730648B1F00848CD4 /* Exceptions for "macosx" folder in "Copy Files to Frameworks" phase from "Transmission" target */,
 				0AD81F55304EC83D00C22874 /* Exceptions for "macosx" folder in "QuickLookExtension" target */,
 			);
 			explicitFolders = (
