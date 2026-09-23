@@ -193,7 +193,6 @@ target_sources(${TR_NAME}-mac
         WebSeedTableView.mm)
 
 set(XIB_FILES
-    AboutWindow.xib
     BlocklistStatusWindow.xib
     FileRenameSheetController.xib
     FilterBar.xib
