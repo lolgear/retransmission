@@ -903,7 +903,7 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
 
 - (void)application:(NSApplication*)application openURLs:(NSArray<NSURL*>*)urls
 {
-    // AppKit sends document opens here as file URLs.
+    // AppKit sends both opened files and magnet links here.
     // It does not call `application:openFiles:` when this method exists.
     NSMutableArray<NSString*>* filenames = [NSMutableArray arrayWithCapacity:urls.count];
     for (NSURL* url in urls) {
