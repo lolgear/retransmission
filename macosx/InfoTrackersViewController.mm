@@ -126,17 +126,6 @@ typedef NS_ENUM(NSInteger, TrackerSegmentTag) {
     return self.fTrackers ? self.fTrackers.count : 0;
 }
 
-- (id<NSPasteboardWriting>)tableView:(NSTableView*)tableView pasteboardWriterForRow:(NSInteger)row
-{
-    id item = self.fTrackers[row];
-
-    if ([item isKindOfClass:[NSDictionary class]]) {
-        return nil;
-    } else {
-        return [(TrackerNode*)item fullAnnounceAddress];
-    }
-}
-
 - (id)tableView:(NSTableView*)tableView objectValueForTableColumn:(NSTableColumn*)column row:(NSInteger)row
 {
     id item = self.fTrackers[row];
@@ -415,7 +404,10 @@ typedef NS_ENUM(NSInteger, TrackerSegmentTag) {
     NSIndexSet* indexes = self.fTrackerTable.selectedRowIndexes;
 
     [indexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL* _Nonnull stop) {
-        [addresses addObject:[self tableView:self.fTrackerTable pasteboardWriterForRow:idx]];
+        id item = self.fTrackers[idx];
+        if ([item isKindOfClass:[TrackerNode class]]) {
+            [addresses addObject:((TrackerNode*)item).fullAnnounceAddress];
+        }
     }];
 
     NSString* text = [addresses componentsJoinedByString:@"\n"];
