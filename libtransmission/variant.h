@@ -139,13 +139,9 @@ public:
             return true;
         }
 
-        [[nodiscard]] tr_variant& operator[](tr_quark const& key)
+        [[nodiscard]] tr_variant& operator[](tr_quark const key)
         {
-            if (auto const iter = find(key); iter != end()) {
-                return iter->second;
-            }
-
-            return vec_.emplace_back(key, tr_variant{}).second;
+            return try_emplace(key, tr_variant{}).first;
         }
 
         template<typename Val>
@@ -155,7 +151,7 @@ public:
                 return { iter->second, false };
             }
 
-            return { vec_.emplace_back(key, tr_variant{ std::forward<Val>(val) }).second, true };
+            return { vec_.emplace_back(key, std::forward<Val>(val)).second, true };
         }
 
         template<typename Val>
