@@ -195,7 +195,6 @@ target_sources(${TR_NAME}-mac
 set(XIB_FILES
     AboutWindow.xib
     BlocklistStatusWindow.xib
-    FileRenameSheetController.xib
     FilterBar.xib
     InfoFileView.xib
     InfoPeersView.xib
