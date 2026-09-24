@@ -1075,7 +1075,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"/Localized: QuickLookExtension/Localizable.strings",
-				NSStringAdditions.mm,
 				QuickLookExtension/PreviewProvider.mm,
 				QuickLookExtension/style.css,
 			);
