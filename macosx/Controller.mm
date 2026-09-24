@@ -443,12 +443,6 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
 
         NSApp.delegate = self;
 
-        //register for magnet URLs (has to be in init)
-        [[NSAppleEventManager sharedAppleEventManager] setEventHandler:self
-                                                           andSelector:@selector(handleOpenContentsEvent:replyEvent:)
-                                                         forEventClass:kInternetEventClass
-                                                            andEventID:kAEGetURL];
-
         _fTorrents = [[NSMutableArray alloc] init];
         _fDisplayedTorrents = [[NSMutableArray alloc] init];
         _fTorrentHashes = [[NSMutableDictionary alloc] init];
@@ -731,11 +725,6 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
     [PowerManager.shared setDelegate:self];
     [PowerManager.shared start];
 
-    //register for dock icon drags (has to be in applicationDidFinishLaunching: to work)
-    [[NSAppleEventManager sharedAppleEventManager] setEventHandler:self andSelector:@selector(handleOpenContentsEvent:replyEvent:)
-                                                     forEventClass:kCoreEventClass
-                                                        andEventID:kAEOpenContents];
-
     //if we were opened from a user notification, do the corresponding action
     UNNotificationResponse* launchNotification = notification.userInfo[NSApplicationLaunchUserNotificationKey];
     if (launchNotification) {
@@ -912,6 +901,24 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
     tr_sessionClose(self.fLib);
 }
 
+- (void)application:(NSApplication*)application openURLs:(NSArray<NSURL*>*)urls
+{
+    // AppKit sends both opened files and magnet links here.
+    // It does not call `application:openFiles:` when this method exists.
+    NSMutableArray<NSString*>* filenames = [NSMutableArray arrayWithCapacity:urls.count];
+    for (NSURL* url in urls) {
+        if (url.fileURL) {
+            [filenames addObject:url.path];
+        } else {
+            [self openURL:url.absoluteString];
+        }
+    }
+
+    if (filenames.count > 0) {
+        [self openFiles:filenames addType:AddTypeManual forcePath:nil];
+    }
+}
+
 - (BOOL)applicationSupportsSecureRestorableState:(NSApplication*)app
 {
     return YES;
@@ -922,26 +929,6 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
 - (tr_session*)sessionHandle
 {
     return self.fLib;
-}
-
-- (void)handleOpenContentsEvent:(NSAppleEventDescriptor*)event replyEvent:(NSAppleEventDescriptor*)replyEvent
-{
-    NSString* urlString = nil;
-
-    NSAppleEventDescriptor* directObject = [event paramDescriptorForKeyword:keyDirectObject];
-    if (directObject.descriptorType == typeAEList) {
-        for (NSInteger i = 1; i <= directObject.numberOfItems; i++) {
-            if ((urlString = [directObject descriptorAtIndex:i].stringValue)) {
-                break;
-            }
-        }
-    } else {
-        urlString = directObject.stringValue;
-    }
-
-    if (urlString) {
-        [self openURL:urlString];
-    }
 }
 
 #pragma mark - NSURLSessionDelegate
@@ -1031,11 +1018,6 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
 }
 
 #pragma mark -
-
-- (void)application:(NSApplication*)app openFiles:(NSArray<NSString*>*)filenames
-{
-    [self openFiles:filenames addType:AddTypeManual forcePath:nil];
-}
 
 - (void)openFiles:(NSArray<NSString*>*)filenames addType:(AddType)type forcePath:(NSString*)path
 {
@@ -1256,20 +1238,6 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
     [self openFiles:@[ dict[@"File"] ] addType:AddTypeCreated forcePath:dict[@"Path"]];
 }
 
-- (void)openFilesWithDict:(NSDictionary*)dictionary
-{
-    [self openFiles:dictionary[@"Filenames"] addType:static_cast<AddType>([dictionary[@"AddType"] intValue]) forcePath:nil];
-}
-
-//called on by applescript
-- (void)open:(NSArray*)files
-{
-    NSDictionary* dict = @{ @"Filenames" : files, @"AddType" : @(AddTypeManual) };
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self openFilesWithDict:dict];
-    });
-}
-
 - (IBAction)openShowSheet:(id)sender
 {
     NSOpenPanel* panel = [NSOpenPanel openPanel];
@@ -1287,12 +1255,9 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
                 [filenames addObject:url.path];
             }
 
-            NSDictionary* dictionary = @{
-                @"Filenames" : filenames,
-                @"AddType" : sender == self.fOpenIgnoreDownloadFolder ? @(AddTypeShowOptions) : @(AddTypeManual)
-            };
+            AddType const addType = sender == self.fOpenIgnoreDownloadFolder ? AddTypeShowOptions : AddTypeManual;
             dispatch_async(dispatch_get_main_queue(), ^{
-                [self openFilesWithDict:dictionary];
+                [self openFiles:filenames addType:addType forcePath:nil];
             });
         }
     }];
@@ -3432,7 +3397,7 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
         }
 
         if (filesToOpen.count > 0) {
-            [self application:NSApp openFiles:filesToOpen];
+            [self openFiles:filesToOpen addType:AddTypeManual forcePath:nil];
         } else {
             if (!torrent && files.count == 1) {
                 [CreatorWindowController createTorrentFile:self.fLib forFile:files[0]];
