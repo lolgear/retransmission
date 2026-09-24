@@ -24,7 +24,6 @@
 CGFloat const kGroupSeparatorHeight = 18.0;
 
 static NSInteger const kMaxGroup = 999999;
-static CGFloat const kErrorImageSize = 20.0;
 
 static NSTimeInterval const kToggleProgressSeconds = 0.175;
 
