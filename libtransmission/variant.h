@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <algorithm> // std::move()
+#include <algorithm> // std::max, std::ranges::find
 #include <concepts> // std::integral
 #include <cstddef> // size_t
 #include <cstdint> // int64_t
@@ -86,15 +86,12 @@ public:
 
         [[nodiscard]] constexpr auto find(tr_quark const key) noexcept
         {
-            auto const predicate = [key](auto const& item) {
-                return item.first == key;
-            };
-            return std::ranges::find_if(vec_, predicate);
+            return std::ranges::find(vec_, key, &Entry::first);
         }
 
         [[nodiscard]] constexpr auto find(tr_quark const key) const noexcept
         {
-            return Vector::const_iterator{ const_cast<Map*>(this)->find(key) };
+            return std::ranges::find(vec_, key, &Entry::first);
         }
 
         [[nodiscard]] constexpr auto contains(tr_quark const key) const noexcept
@@ -125,15 +122,6 @@ public:
             }
 
             return 0U;
-        }
-
-        // std::erase_if-style helper: removes every element for which
-        // `pred(std::pair<tr_quark, tr_variant> const&)` is true and
-        // returns the number of elements removed.
-        template<typename Predicate>
-        auto erase_if(Predicate pred)
-        {
-            return std::erase_if(vec_, std::move(pred));
         }
 
         constexpr bool replace_key(tr_quark const old_key, tr_quark const new_key)
@@ -182,24 +170,24 @@ public:
 
         // --- custom functions
 
-        template<typename Type>
+        template<typename Val>
         [[nodiscard]] constexpr auto* find_if(tr_quark const key) noexcept
         {
             auto const iter = find(key);
-            return iter != end() ? iter->second.get_if<Type>() : nullptr;
+            return iter != end() ? iter->second.get_if<Val>() : nullptr;
         }
 
-        template<typename Type>
+        template<typename Val>
         [[nodiscard]] constexpr auto const* find_if(tr_quark const key) const noexcept
         {
-            return const_cast<Map*>(this)->find_if<Type>(key);
+            return const_cast<Map*>(this)->find_if<Val>(key);
         }
 
-        template<typename Type>
-        [[nodiscard]] std::optional<Type> value_if(tr_quark const key) const noexcept
+        template<typename Val>
+        [[nodiscard]] std::optional<Val> value_if(tr_quark const key) const noexcept
         {
             if (auto it = find(key); it != end()) {
-                return it->second.value_if<Type>();
+                return it->second.value_if<Val>();
             }
 
             return std::nullopt;
@@ -210,8 +198,8 @@ public:
         [[nodiscard]] Map clone() const;
 
     private:
-        using Vector = std::vector<std::pair<tr_quark, tr_variant>>;
-        Vector vec_;
+        using Entry = std::pair<tr_quark, tr_variant>;
+        std::vector<Entry> vec_;
     };
 
     constexpr tr_variant() noexcept = default;
@@ -532,8 +520,6 @@ public:
     tr_error error_;
 
 private:
-    friend tr_variant;
-
     enum class Type : uint8_t { Benc, Json };
 
     explicit tr_variant_serde(Type type)
