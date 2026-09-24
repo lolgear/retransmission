@@ -46,6 +46,7 @@ static AboutWindowController* fAboutBoxInstance = nil;
                                                     defer:NO];
     panel.restorable = NO;
     panel.releasedWhenClosed = NO;
+    panel.hidesOnDeactivate = NO;
     panel.tabbingMode = NSWindowTabbingModeDisallowed;
     panel.delegate = self;
 
@@ -76,6 +77,7 @@ static AboutWindowController* fAboutBoxInstance = nil;
     creditsScrollView.hasHorizontalScroller = NO;
     creditsScrollView.hasVerticalScroller = YES;
     creditsScrollView.drawsBackground = NO;
+    creditsScrollView.borderType = NSBezelBorder;
     creditsScrollView.translatesAutoresizingMaskIntoConstraints = NO;
 
     self.fTextView = [[NSTextView alloc] init];
@@ -94,7 +96,8 @@ static AboutWindowController* fAboutBoxInstance = nil;
     self.fCopyrightField.translatesAutoresizingMaskIntoConstraints = NO;
     [contentView addSubview:self.fCopyrightField];
 
-    self.fLicenseButton = [NSButton buttonWithTitle:@"License" target:self action:@selector(showLicense:)];
+    self.fLicenseButton = [NSButton buttonWithTitle:NSLocalizedString(@"License", "About window -> license button") target:self
+                                             action:@selector(showLicense:)];
     self.fLicenseButton.bezelStyle = NSBezelStyleRounded;
     self.fLicenseButton.translatesAutoresizingMaskIntoConstraints = NO;
     [contentView addSubview:self.fLicenseButton];
@@ -110,7 +113,6 @@ static AboutWindowController* fAboutBoxInstance = nil;
 
         [self.fVersionField.topAnchor constraintEqualToAnchor:titleField.bottomAnchor constant:8],
         [self.fVersionField.centerXAnchor constraintEqualToAnchor:titleField.centerXAnchor],
-        [self.fVersionField.widthAnchor constraintEqualToAnchor:titleField.widthAnchor],
 
         [creditsScrollView.topAnchor constraintGreaterThanOrEqualToAnchor:self.fVersionField.bottomAnchor constant:12],
         [creditsScrollView.topAnchor constraintGreaterThanOrEqualToAnchor:iconView.bottomAnchor constant:8],
@@ -127,6 +129,8 @@ static AboutWindowController* fAboutBoxInstance = nil;
         [self.fLicenseButton.leadingAnchor constraintGreaterThanOrEqualToAnchor:self.fCopyrightField.trailingAnchor constant:8]
     ]];
 
+    [panel center];
+
     self.window = panel;
 }
 
@@ -141,6 +145,7 @@ static AboutWindowController* fAboutBoxInstance = nil;
     licenseScrollView.hasHorizontalScroller = NO;
     licenseScrollView.hasVerticalScroller = YES;
     licenseScrollView.drawsBackground = NO;
+    licenseScrollView.borderType = NSBezelBorder;
     licenseScrollView.translatesAutoresizingMaskIntoConstraints = NO;
 
     self.fLicenseView = [[NSTextView alloc] init];
@@ -184,7 +189,6 @@ static AboutWindowController* fAboutBoxInstance = nil;
     if (credits) {
         [self.fTextView.textStorage setAttributedString:credits];
     }
-    self.fLicenseButton.title = NSLocalizedString(@"License", "About window -> license button");
 }
 
 - (void)windowDidLoad
