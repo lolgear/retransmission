@@ -183,8 +183,6 @@ target_sources(${TR_NAME}-mac
         TrackerCell.mm
         TrackerNode.h
         TrackerNode.mm
-        TrackerTableView.h
-        TrackerTableView.mm
         URLSheetWindowController.h
         URLSheetWindowController.mm
         Utils.h
