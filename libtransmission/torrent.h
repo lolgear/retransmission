@@ -438,12 +438,12 @@ struct tr_torrent {
         return file_priorities_.piece_priority(piece);
     }
 
-    void set_file_priorities(std::span<tr_file_index_t const> files, tr_priority_t priority);
-
-    void set_file_priority(tr_file_index_t file, tr_priority_t priority)
+    [[nodiscard]] constexpr tr_priority_t file_priority(tr_file_index_t const file) const noexcept
     {
-        set_file_priorities(std::span{ &file, 1U }, priority);
+        return file_priorities_.file_priority(file);
     }
+
+    void set_file_priorities(std::span<tr_file_index_t const> files, tr_priority_t priority);
 
     /// LOCATION
 
@@ -863,8 +863,8 @@ struct tr_torrent {
 
     void set_idle_limit_mode(tr_idlelimit mode) noexcept
     {
+        // RPC and resume files pass modes through unchecked, so ignore an invalid one.
         auto const is_valid = mode == TR_IDLELIMIT_GLOBAL || mode == TR_IDLELIMIT_SINGLE || mode == TR_IDLELIMIT_UNLIMITED;
-        TR_ASSERT(is_valid);
         if (idle_limit_mode_ != mode && is_valid) {
             idle_limit_mode_ = mode;
             set_dirty();
@@ -906,8 +906,8 @@ struct tr_torrent {
 
     constexpr void set_seed_ratio_mode(tr_ratiolimit mode) noexcept
     {
+        // RPC and resume files pass modes through unchecked, so ignore an invalid one.
         auto const is_valid = mode == TR_RATIOLIMIT_GLOBAL || mode == TR_RATIOLIMIT_SINGLE || mode == TR_RATIOLIMIT_UNLIMITED;
-        TR_ASSERT(is_valid);
         if (seed_ratio_mode_ != mode && is_valid) {
             seed_ratio_mode_ = mode;
             set_dirty();
