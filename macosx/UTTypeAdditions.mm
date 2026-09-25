@@ -28,4 +28,17 @@ static NSString* const kTorrentFileType = @"org.bittorrent.torrent";
 
     return fileType ?: UTTypeData;
 }
+
++ (BOOL)isTorrentResponseWithMIMEType:(nullable NSString *)mimeType
+                    suggestedFilename:(nullable NSString *)suggestedFilename
+{
+    UTType* contentType = mimeType.length > 0 ? [UTType typeWithMIMEType:mimeType] : nil;
+    NSString* suggestedExtension = suggestedFilename.pathExtension;
+    UTType* fileType = suggestedExtension.length > 0 ? [UTType typeWithFilenameExtension:suggestedExtension] : nil;
+    UTType* torrentType = UTType.torrent;
+
+    return [suggestedExtension.lowercaseString isEqualToString:@"torrent"] ||
+           [contentType conformsToType:torrentType] ||
+           [fileType conformsToType:torrentType];
+}
 @end

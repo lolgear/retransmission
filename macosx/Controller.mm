@@ -940,14 +940,10 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
     didReceiveResponse:(nonnull NSURLResponse*)response
      completionHandler:(nonnull void (^)(NSURLSessionResponseDisposition))completionHandler
 {
-    NSString* mimeType = response.MIMEType;
-    UTType* contentType = mimeType.length > 0 ? [UTType typeWithMIMEType:mimeType] : nil;
-    NSString* suggestedName = response.suggestedFilename;
-    NSString* suggestedExtension = suggestedName.pathExtension;
-    UTType* fileType = suggestedExtension.length > 0 ? [UTType typeWithFilenameExtension:suggestedExtension] : nil;
-    UTType* torrentType = UTType.torrent;
 
-    BOOL isTorrent = [contentType conformsToType:torrentType] || [fileType conformsToType:torrentType];
+    NSString* suggestedFilename = response.suggestedFilename;
+    BOOL isTorrent = [UTType isTorrentResponseWithMIMEType:response.MIMEType
+                                         suggestedFilename:suggestedFilename];
 
     if (isTorrent) {
         completionHandler(NSURLSessionResponseBecomeDownload);
@@ -958,7 +954,7 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
 
     NSString* message = [NSString
         stringWithFormat:NSLocalizedString(@"It appears that the file \"%@\" from %@ is not a torrent file.", "Download not a torrent -> message"),
-                         suggestedName,
+                         suggestedFilename,
                          dataTask.originalRequest.URL.absoluteString.stringByRemovingPercentEncoding];
     dispatch_async(dispatch_get_main_queue(), ^{
         NSAlert* alert = [[NSAlert alloc] init];
@@ -1268,7 +1264,9 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
     panel.canChooseFiles = YES;
     panel.canChooseDirectories = NO;
 
-    panel.allowedContentTypes = @[ UTType.torrent ];
+    // The @"torrent" entry in main's allowedFileTypes also accepted files by their extension.
+    // If another app declares a different type for .torrent and LaunchServices prefers it, .torrent files show up greyed out.
+    panel.allowedContentTypes = @[ UTType.torrent, [UTType typeWithFilenameExtension:@"torrent"] ?: UTType.torrent ];
 
     [panel beginSheetModalForWindow:self.fWindow completionHandler:^(NSInteger result) {
         if (result == NSModalResponseOK) {
@@ -3108,8 +3106,7 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
 
         NSString* fullFile = [path stringByAppendingPathComponent:file];
 
-        auto fileURL = [NSURL fileURLWithPath:fullFile];
-        if (!(fileURL.isTorrentFile)) {
+        if (![NSURL fileURLWithPath:fullFile].isTorrentFile) {
             continue;
         }
 

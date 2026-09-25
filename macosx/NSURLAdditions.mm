@@ -5,8 +5,10 @@
 - (BOOL)isTorrentFile
 {
     UTType* contentType = nil;
-    if ([self getResourceValue:&contentType forKey:NSURLContentTypeKey error:NULL] && contentType) {
-        return [contentType conformsToType:UTType.torrent];
+
+    if ([self getResourceValue:&contentType forKey:NSURLContentTypeKey error:NULL] && contentType &&
+        [contentType conformsToType:UTType.torrent]) {
+        return YES;
     }
 
     // LaunchServices resolves .torrent to another declared type when a different
