@@ -27,11 +27,8 @@
 // serializer header does not have to pull in `<small/vector.hpp>`.
 namespace tr::serializer
 {
-template<>
-struct Converter<small::max_size_vector<tr_preferred_transport, PreferredTransportCount>> {
-    static tr_variant to_variant(small::max_size_vector<tr_preferred_transport, PreferredTransportCount> const& src);
-    static bool to_value(tr_variant const& src, small::max_size_vector<tr_preferred_transport, PreferredTransportCount>* tgt);
-};
+using PreferredTransports = small::max_size_vector<tr_preferred_transport, PreferredTransportCount>;
+TR_DECLARE_CONVERTER(PreferredTransports)
 } // namespace tr::serializer
 
 namespace tr
@@ -140,7 +137,7 @@ public:
 
     tr_encryption_mode encryption_mode = TR_ENCRYPTION_PREFERRED;
     tr_log_level log_level = TR_LOG_INFO;
-    tr_mode_t umask = 022;
+    tr_mode_t umask{ 022 };
     tr_file_preallocation preallocation_mode = tr_file_preallocation::Sparse;
     tr_port peer_port_random_high = tr_port::from_host(65535);
     tr_port peer_port_random_low = tr_port::from_host(49152);
@@ -298,7 +295,7 @@ public:
     std::string url = std::string{ TrDefaultHttpServerBasePath };
     std::string username;
     std::string whitelist_str = std::string{ TrDefaultRpcWhitelist };
-    tr_mode_t socket_mode = 0750;
+    tr_mode_t socket_mode{ 0750 };
     tr_port port = tr_port::from_host(TrDefaultRpcPort);
 
 private:
