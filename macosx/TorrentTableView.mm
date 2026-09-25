@@ -93,13 +93,8 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
 - (void)awakeFromNib
 {
     [super awakeFromNib];
-    [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(refreshTorrentTable) name:@"RefreshTorrentTable"
+    [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(reloadVisibleRows) name:@"RefreshTorrentTable"
                                              object:nil];
-}
-
-- (void)refreshTorrentTable
-{
-    [self reloadVisibleRows];
 }
 
 //make sure we don't lose selection on manual reloads
@@ -475,8 +470,16 @@ static NSTimeInterval const kToggleProgressSeconds = 0.175;
 //make sure that the pause buttons become orange when holding down the option key
 - (void)flagsChanged:(NSEvent*)event
 {
-    [self reloadVisibleRows];
     [super flagsChanged:event];
+
+    NSRange visibleRows = [self rowsInRect:self.visibleRect];
+    for (NSInteger i = visibleRows.location; i < NSMaxRange(visibleRows); i++) {
+        TorrentCell* torrentCell = [self viewAtColumn:0 row:i makeIfNecessary:NO];
+        if ([torrentCell isKindOfClass:[TorrentCell class]]) {
+            [torrentCell.fControlButton updateImage];
+            [torrentCell.fControlButton setNeedsDisplay:YES];
+        }
+    }
 }
 
 //option-command-f will focus the filter bar's search field
