@@ -3,11 +3,10 @@
 // or any future license endorsed by Mnemosaic LLC.
 // License text can be found in the licenses/ folder.
 
-#include <array>
 #include <atomic>
 #include <chrono>
 #include <cstdint>
-#include <cstdio>
+#include <cstdlib> // std::system()
 #include <optional>
 #include <string>
 #include <string_view>
@@ -167,30 +166,21 @@ struct CommandResult {
     std::string output;
 };
 
-// Run a command, capturing its combined stdout+stderr and exit code.
+// Run a command and return its exit code and stdout.
+// gtest points this process's stdout at a temp file, and the child inherits it.
+// Reading that file after the child exits doesn't depend on when a popen() pipe reports EOF.
 CommandResult run(std::string const& command)
 {
+    testing::internal::CaptureStdout();
 #ifdef _WIN32
-    auto* const pipe = _popen(command.c_str(), "r");
+    // cmd.exe /c strips the first and last quote from a command line that starts with a quote and has more than two.
+    // It strips this extra pair instead of the inner quotes.
+    auto const exit_code = std::system(fmt::format(R"("{:s}")", command).c_str());
 #else
-    auto* const pipe = popen(command.c_str(), "r");
+    auto const rc = std::system(command.c_str());
+    auto const exit_code = WIFEXITED(rc) ? WEXITSTATUS(rc) : -1;
 #endif
-    if (pipe == nullptr) {
-        return {};
-    }
-
-    auto output = std::string{};
-    auto buffer = std::array<char, 4096>{};
-    while (std::fgets(std::data(buffer), std::size(buffer), pipe) != nullptr) {
-        output += std::data(buffer);
-    }
-
-#ifdef _WIN32
-    return { _pclose(pipe), output };
-#else
-    auto const rc = pclose(pipe);
-    return { WIFEXITED(rc) ? WEXITSTATUS(rc) : -1, output };
-#endif
+    return { exit_code, testing::internal::GetCapturedStdout() };
 }
 
 TEST(RemoteLoopback, performsSessionHandshakeAndSucceeds)
