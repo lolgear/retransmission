@@ -18,6 +18,7 @@
 #import "NSImageAdditions.h"
 #import "NSStringAdditions.h"
 #import "Utils.h"
+#import "PrefsGeneralTabViewController.h"
 
 typedef NS_ENUM(NSUInteger, DownloadPopupIndex) {
     DownloadPopupIndexFolder = 0,
@@ -51,6 +52,7 @@ static NSString* const kWebUIURLFormat = @"http://localhost:%ld/";
 @property(nonatomic) BOOL fHasLoaded;
 
 @property(nonatomic) IBOutlet NSView* fGeneralView;
+@property(nonatomic) PrefsGeneralTabViewController* generalViewController;
 @property(nonatomic) IBOutlet NSView* fTransfersView;
 @property(nonatomic) IBOutlet NSView* fBandwidthView;
 @property(nonatomic) IBOutlet NSView* fPeersView;
@@ -141,7 +143,7 @@ static NSString* const kWebUIURLFormat = @"http://localhost:%ld/";
         _fRPCWhitelistArray = [NSMutableArray arrayWithArray:[self.fDefaults arrayForKey:@"RPCWhitelist"] ?: @[ @"127.0.0.1" ]];
         [self updateRPCWhitelist];
 
-        _fDefaultAppHelper = [[DefaultAppHelper alloc] init];
+        _generalViewController = [[PrefsGeneralTabViewController alloc] initWithHandle:handle];
     }
 
     return self;
@@ -178,7 +180,7 @@ static NSString* const kWebUIURLFormat = @"http://localhost:%ld/";
 
     [self setPrefView:nil];
 
-    [self updateDefaultsStates];
+    [self.generalViewController updateDefaultsStates];
 
     //set special-handling of magnet link add window checkbox
     [self updateShowAddMagnetWindowField];
@@ -1418,7 +1420,7 @@ static NSString* const kWebUIURLFormat = @"http://localhost:%ld/";
         view = self.fRemoteView;
     } else {
         identifier = ToolbarTabGeneral; //general view is the default selected
-        view = self.fGeneralView;
+        view = self.generalViewController.view;
     }
 
     self.window.toolbar.selectedItemIdentifier = identifier;
