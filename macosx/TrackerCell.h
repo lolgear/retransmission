@@ -4,6 +4,8 @@
 
 #import <AppKit/AppKit.h>
 
-@interface TrackerCell : NSActionCell
+@class TrackerNode;
 
+@interface TrackerView : NSTableCellView
+- (void)configureWithNode:(TrackerNode*)node;
 @end
