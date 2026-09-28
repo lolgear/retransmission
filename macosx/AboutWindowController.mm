@@ -9,11 +9,6 @@
 @property(nonatomic) NSTextView* fTextView;
 @property(nonatomic) NSTextField* fVersionField;
 @property(nonatomic) NSTextField* fCopyrightField;
-@property(nonatomic) NSButton* fLicenseButton;
-
-@property(nonatomic) NSPanel* fLicenseSheet;
-@property(nonatomic) NSTextView* fLicenseView;
-@property(nonatomic) NSButton* fLicenseCloseButton;
 @end
 
 @implementation AboutWindowController
@@ -32,7 +27,6 @@ static AboutWindowController* fAboutBoxInstance = nil;
     self = [super initWithWindow:window];
     if (self) {
         [self setupMainWindow];
-        [self setupLicenseWindow];
         [self configureContent];
     }
     return self;
@@ -96,12 +90,6 @@ static AboutWindowController* fAboutBoxInstance = nil;
     self.fCopyrightField.translatesAutoresizingMaskIntoConstraints = NO;
     [contentView addSubview:self.fCopyrightField];
 
-    self.fLicenseButton = [NSButton buttonWithTitle:NSLocalizedString(@"License", "About window -> license button") target:self
-                                             action:@selector(showLicense:)];
-    self.fLicenseButton.bezelStyle = NSBezelStyleRounded;
-    self.fLicenseButton.translatesAutoresizingMaskIntoConstraints = NO;
-    [contentView addSubview:self.fLicenseButton];
-
     [NSLayoutConstraint activateConstraints:@[
         [iconView.widthAnchor constraintEqualToConstant:64],
         [iconView.heightAnchor constraintEqualToConstant:64],
@@ -120,62 +108,15 @@ static AboutWindowController* fAboutBoxInstance = nil;
         [creditsScrollView.trailingAnchor constraintEqualToAnchor:contentView.trailingAnchor constant:1],
         [creditsScrollView.heightAnchor constraintEqualToConstant:190],
 
-        [self.fLicenseButton.topAnchor constraintEqualToAnchor:creditsScrollView.bottomAnchor constant:20],
-        [self.fLicenseButton.trailingAnchor constraintEqualToAnchor:contentView.trailingAnchor constant:-20],
-        [self.fLicenseButton.bottomAnchor constraintEqualToAnchor:contentView.bottomAnchor constant:-20],
-
+        [self.fCopyrightField.topAnchor constraintEqualToAnchor:creditsScrollView.bottomAnchor constant:20],
         [self.fCopyrightField.leadingAnchor constraintEqualToAnchor:contentView.leadingAnchor constant:20],
-        [self.fCopyrightField.firstBaselineAnchor constraintEqualToAnchor:self.fLicenseButton.firstBaselineAnchor],
-        [self.fLicenseButton.leadingAnchor constraintGreaterThanOrEqualToAnchor:self.fCopyrightField.trailingAnchor constant:8]
+        [self.fCopyrightField.trailingAnchor constraintLessThanOrEqualToAnchor:contentView.trailingAnchor constant:-20],
+        [self.fCopyrightField.bottomAnchor constraintEqualToAnchor:contentView.bottomAnchor constant:-20]
     ]];
 
     [panel center];
 
     self.window = panel;
-}
-
-- (void)setupLicenseWindow
-{
-    self.fLicenseSheet = [[NSPanel alloc] initWithContentRect:NSMakeRect(0, 0, 530, 331) styleMask:NSWindowStyleMaskTitled
-                                                      backing:NSBackingStoreBuffered
-                                                        defer:NO];
-    self.fLicenseSheet.hidesOnDeactivate = NO;
-
-    NSView* sheetContentView = self.fLicenseSheet.contentView;
-
-    NSScrollView* licenseScrollView = [[NSScrollView alloc] init];
-    licenseScrollView.hasHorizontalScroller = NO;
-    licenseScrollView.hasVerticalScroller = YES;
-    licenseScrollView.drawsBackground = NO;
-    licenseScrollView.borderType = NSBezelBorder;
-    licenseScrollView.translatesAutoresizingMaskIntoConstraints = NO;
-
-    self.fLicenseView = [[NSTextView alloc] init];
-    self.fLicenseView.editable = NO;
-    self.fLicenseView.selectable = YES;
-    self.fLicenseView.textColor = [NSColor textColor];
-    self.fLicenseView.backgroundColor = [NSColor textBackgroundColor];
-
-    licenseScrollView.documentView = self.fLicenseView;
-    [sheetContentView addSubview:licenseScrollView];
-
-    self.fLicenseCloseButton = [NSButton buttonWithTitle:NSLocalizedString(@"OK", "About window -> license close button") target:self
-                                                  action:@selector(hideLicense:)];
-    self.fLicenseCloseButton.bezelStyle = NSBezelStyleRounded;
-    self.fLicenseCloseButton.keyEquivalent = @"\r";
-    self.fLicenseCloseButton.translatesAutoresizingMaskIntoConstraints = NO;
-    [sheetContentView addSubview:self.fLicenseCloseButton];
-
-    [NSLayoutConstraint activateConstraints:@[
-        [licenseScrollView.topAnchor constraintEqualToAnchor:sheetContentView.topAnchor constant:20],
-        [licenseScrollView.leadingAnchor constraintEqualToAnchor:sheetContentView.leadingAnchor constant:20],
-        [licenseScrollView.trailingAnchor constraintEqualToAnchor:sheetContentView.trailingAnchor constant:-20],
-
-        [self.fLicenseCloseButton.topAnchor constraintEqualToAnchor:licenseScrollView.bottomAnchor constant:20],
-        [self.fLicenseCloseButton.trailingAnchor constraintEqualToAnchor:sheetContentView.trailingAnchor constant:-20],
-        [self.fLicenseCloseButton.bottomAnchor constraintEqualToAnchor:sheetContentView.bottomAnchor constant:-20],
-        [self.fLicenseCloseButton.widthAnchor constraintGreaterThanOrEqualToConstant:80]
-    ]];
 }
 
 - (void)configureContent
@@ -197,22 +138,6 @@ static AboutWindowController* fAboutBoxInstance = nil;
 - (void)windowWillClose:(NSNotification*)notification
 {
     fAboutBoxInstance = nil;
-}
-
-- (void)showLicense:(id)sender
-{
-    NSString* licenseText = [NSString stringWithContentsOfFile:[NSBundle.mainBundle pathForResource:@"COPYING" ofType:nil]
-                                                  usedEncoding:nil
-                                                         error:NULL];
-    if (licenseText) {
-        self.fLicenseView.string = licenseText;
-    }
-    [self.window beginSheet:self.fLicenseSheet completionHandler:nil];
-}
-
-- (void)hideLicense:(id)sender
-{
-    [self.window endSheet:self.fLicenseSheet];
 }
 
 @end
