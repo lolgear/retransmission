@@ -1,3 +1,7 @@
+// This file Copyright © Transmission authors and contributors.
+// It may be used under the MIT (SPDX: MIT) license.
+// License text can be found in the licenses/ folder.
+
 #import "PrefsGeneralTabViewController.h"
 #import "DefaultAppHelper.h"
 
@@ -6,7 +10,6 @@
 @property(nonatomic) NSButton* fSystemPreferencesButton;
 @property(nonatomic) NSButton* fSetDefaultForMagnetButton;
 @property(nonatomic) NSButton* fSetDefaultForTorrentButton;
-@property(nonatomic) NSTextField* fCheckForUpdatesLabel;
 @property(nonatomic) NSButton* fCheckForUpdatesButton;
 @property(nonatomic) NSButton* fCheckForUpdatesBetaButton;
 
@@ -19,16 +22,16 @@
 @property(nonatomic) NSButton* fPromptQuitDownloadingButton;
 @property(nonatomic) NSButton* fResetWarningsButton;
 
+@property(nonatomic, readonly) NSUserDefaults* fDefaults;
 @property(nonatomic, readonly) DefaultAppHelper* fDefaultAppHelper;
 
 @end
 
 @implementation PrefsGeneralTabViewController
 
-- (instancetype)initWithHandle:(tr_session*)handle
+- (instancetype)init
 {
     if ((self = [super initWithNibName:nil bundle:nil])) {
-        _fHandle = handle;
         _fDefaults = NSUserDefaults.standardUserDefaults;
         _fDefaultAppHelper = [[DefaultAppHelper alloc] init];
     }
@@ -112,7 +115,7 @@
 
     [gridView addRowWithViews:@[ [NSTextField labelWithString:@"Badge Dock icon with:"], self.fBadgeDownloadButton ]];
 
-    [gridView addRowWithViews:@[ [[NSView alloc] init], self.fBadgeUploadButton ]];
+    [gridView addRowWithViews:@[ NSGridCell.emptyContentView, self.fBadgeUploadButton ]];
 
     [gridView addRowWithViews:@[ [NSTextField labelWithString:@"Notifications:"], self.fSystemPreferencesButton ]];
 
@@ -121,15 +124,15 @@
     NSStackView* fPromptRemoveDownloadingButtonStack = [[NSStackView alloc] init];
     [fPromptRemoveDownloadingButtonStack addArrangedSubview:self.fPromptRemoveDownloadingButton];
     fPromptRemoveDownloadingButtonStack.edgeInsets = { 0, 19, 0, 0 };
-    [gridView addRowWithViews:@[ [[NSView alloc] init], fPromptRemoveDownloadingButtonStack ]];
+    [gridView addRowWithViews:@[ NSGridCell.emptyContentView, fPromptRemoveDownloadingButtonStack ]];
 
-    [gridView addRowWithViews:@[ [[NSView alloc] init], self.fPromptQuitButton ]];
+    [gridView addRowWithViews:@[ NSGridCell.emptyContentView, self.fPromptQuitButton ]];
 
     NSStackView* fPromptQuitDownloadingButtonStack = [[NSStackView alloc] init];
     [fPromptQuitDownloadingButtonStack addArrangedSubview:self.fPromptQuitDownloadingButton];
     fPromptQuitDownloadingButtonStack.edgeInsets = { 0, 19, 0, 0 };
 
-    [gridView addRowWithViews:@[ [[NSView alloc] init], fPromptQuitDownloadingButtonStack ]];
+    [gridView addRowWithViews:@[ NSGridCell.emptyContentView, fPromptQuitDownloadingButtonStack ]];
 
     [gridView addRowWithViews:@[ [NSTextField labelWithString:@"Reset all alerts:"], self.fResetWarningsButton ]];
 
@@ -139,7 +142,7 @@
 
     [gridView addRowWithViews:@[ [NSTextField labelWithString:@"Check for update:"], self.fCheckForUpdatesButton ]];
 
-    [gridView addRowWithViews:@[ [[NSView alloc] init], self.fCheckForUpdatesBetaButton ]];
+    [gridView addRowWithViews:@[ NSGridCell.emptyContentView, self.fCheckForUpdatesBetaButton ]];
 
     [gridView columnAtIndex:0].xPlacement = NSGridCellPlacementTrailing;
 
