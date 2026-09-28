@@ -5,7 +5,7 @@
 #include <array>
 
 #import "ProgressBarView.h"
-#import "ProgressGradients.h"
+#import "ProgressColors.h"
 #import "TorrentTableView.h"
 #import "Torrent.h"
 #import "NSApplicationAdditions.h"
@@ -84,25 +84,33 @@ static NSInteger const kMaxPieces = 18 * 18;
     if (!NSIsEmptyRect(haveRect)) {
         if (torrent.active) {
             if (torrent.checking) {
-                [ProgressGradients.progressYellowGradient drawInRect:haveRect angle:90];
+                [ProgressColors.progressYellowColor set];
+                NSRectFill(haveRect);
             } else if (torrent.seeding) {
                 NSRect ratioHaveRect, ratioRemainingRect;
                 NSDivideRect(haveRect, &ratioHaveRect, &ratioRemainingRect, round(torrent.progressStopRatio * NSWidth(haveRect)), NSMinXEdge);
 
-                [ProgressGradients.progressGreenGradient drawInRect:ratioHaveRect angle:90];
-                [ProgressGradients.progressLightGreenGradient drawInRect:ratioRemainingRect angle:90];
+                [ProgressColors.progressGreenColor set];
+                NSRectFill(ratioHaveRect);
+
+                [ProgressColors.progressLightGreenColor set];
+                NSRectFill(ratioRemainingRect);
             } else {
-                [ProgressGradients.progressBlueGradient drawInRect:haveRect angle:90];
+                [ProgressColors.progressBlueColor set];
+                NSRectFill(haveRect);
             }
         } else {
             if (torrent.waitingToStart) {
                 if (torrent.allDownloaded) {
-                    [ProgressGradients.progressDarkGreenGradient drawInRect:haveRect angle:90];
+                    [ProgressColors.progressDarkGreenColor set];
+                    NSRectFill(haveRect);
                 } else {
-                    [ProgressGradients.progressDarkBlueGradient drawInRect:haveRect angle:90];
+                    [ProgressColors.progressDarkBlueColor set];
+                    NSRectFill(haveRect);
                 }
             } else {
-                [ProgressGradients.progressGrayGradient drawInRect:haveRect angle:90];
+                [ProgressColors.progressGrayColor set];
+                NSRectFill(haveRect);
             }
         }
     }
@@ -119,19 +127,23 @@ static NSInteger const kMaxPieces = 18 * 18;
             NSRect unavailableRect;
             NSDivideRect(wantedRect, &wantedRect, &unavailableRect, round(NSWidth(wantedRect) * torrent.availableDesired), NSMinXEdge);
 
-            [ProgressGradients.progressRedGradient drawInRect:unavailableRect angle:90];
+            [ProgressColors.progressRedColor set];
+            NSRectFill(unavailableRect);
         }
 
         //remaining section
-        [ProgressGradients.progressWhiteGradient drawInRect:wantedRect angle:90];
+        [ProgressColors.progressWhiteColor set];
+        NSRectFill(wantedRect);
     }
 
     //unwanted section
     if (!NSIsEmptyRect(missingRect)) {
         if (!torrent.magnet) {
-            [ProgressGradients.progressLightGrayGradient drawInRect:missingRect angle:90];
+            [ProgressColors.progressLightGrayColor set];
+            NSRectFill(missingRect);
         } else {
-            [ProgressGradients.progressRedGradient drawInRect:missingRect angle:90];
+            [ProgressColors.progressRedColor set];
+            NSRectFill(missingRect);
         }
     }
 }
