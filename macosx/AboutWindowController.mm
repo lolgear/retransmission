@@ -67,20 +67,19 @@ static AboutWindowController* fAboutBoxInstance = nil;
     self.fVersionField.translatesAutoresizingMaskIntoConstraints = NO;
     [contentView addSubview:self.fVersionField];
 
-    NSScrollView* creditsScrollView = [[NSScrollView alloc] init];
+    NSScrollView* creditsScrollView = [NSTextView scrollableTextView];
     creditsScrollView.hasHorizontalScroller = NO;
     creditsScrollView.hasVerticalScroller = YES;
     creditsScrollView.drawsBackground = NO;
     creditsScrollView.borderType = NSBezelBorder;
     creditsScrollView.translatesAutoresizingMaskIntoConstraints = NO;
 
-    self.fTextView = [[NSTextView alloc] init];
+    self.fTextView = creditsScrollView.documentView;
     self.fTextView.editable = NO;
     self.fTextView.selectable = YES;
     self.fTextView.textColor = [NSColor textColor];
     self.fTextView.backgroundColor = [NSColor textBackgroundColor];
 
-    creditsScrollView.documentView = self.fTextView;
     [contentView addSubview:creditsScrollView];
 
     self.fCopyrightField = [NSTextField labelWithString:@""];
