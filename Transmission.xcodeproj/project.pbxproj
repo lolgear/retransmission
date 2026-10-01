@@ -20,7 +20,6 @@
 		3C7A11980D0B2EE300B5701F /* getgateway.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C7A11920D0B2EE300B5701F /* getgateway.h */; };
 		3C7A11990D0B2EE300B5701F /* natpmp.c in Sources */ = {isa = PBXBuildFile; fileRef = 3C7A11930D0B2EE300B5701F /* natpmp.c */; };
 		3C7A119A0D0B2EE300B5701F /* natpmp.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C7A11940D0B2EE300B5701F /* natpmp.h */; };
-		4D1838DD09DEC0E80047D688 /* libtransmission.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D18389709DEC0030047D688 /* libtransmission.a */; };
 		4D1A996DF3E6096A0EC5969E /* announcer-common.cc in Sources */ = {isa = PBXBuildFile; fileRef = 10D3CB271270C579F589D5A8 /* announcer-common.cc */; };
 		4D36BA6F0CA2F00800A63CA5 /* peer-mse.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4D36BA600CA2F00800A63CA5 /* peer-mse.cc */; };
 		4D36BA700CA2F00800A63CA5 /* peer-mse.h in Headers */ = {isa = PBXBuildFile; fileRef = 4D36BA610CA2F00800A63CA5 /* peer-mse.h */; };
@@ -382,7 +381,6 @@
 		ED0C0D1D2E5F400100112233 /* lock-file.cc in Sources */ = {isa = PBXBuildFile; fileRef = ED0C0D1E2E5F400100112233 /* lock-file.cc */; };
 		ED5E0E7E2CD30B180071433B /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED5E0E7D2CD30B180071433B /* Quartz.framework */; };
 		ED5E0E8D2CD30B180071433B /* QuickLookExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = ED5E0E7C2CD30B180071433B /* QuickLookExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		ED5E0E9D2CD3134B0071433B /* libtransmission.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D18389709DEC0030047D688 /* libtransmission.a */; };
 		ED5E0EA02CD3147B0071433B /* libcurl.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 55869925257074EC00F77A43 /* libcurl.tbd */; };
 		ED67FB422B70FCE400D8A037 /* converters.cc in Sources */ = {isa = PBXBuildFile; fileRef = ED67FB402B70FCE400D8A037 /* converters.cc */; };
 		ED67FB432B70FCE400D8A037 /* serializer.h in Headers */ = {isa = PBXBuildFile; fileRef = ED67FB412B70FCE400D8A037 /* serializer.h */; };
@@ -416,12 +414,19 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		4D1838E509DEC1170047D688 /* PBXContainerItemProxy */ = {
+		0AC6B372306EDA3C00528973 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 4D18389609DEC0030047D688;
-			remoteInfo = libtransmission;
+			remoteGlobalIDString = 0AC6B36D306ED76F00528973;
+			remoteInfo = BuildLibTransmission;
+		};
+		0AC6B374306EDA4000528973 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0AC6B36D306ED76F00528973;
+			remoteInfo = BuildLibTransmission;
 		};
 		51D0F7010000000000000010 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -492,13 +497,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = ED5E0E7B2CD30B180071433B;
 			remoteInfo = QuickLookExtension;
-		};
-		ED5E0E9E2CD3134B0071433B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 4D18389609DEC0030047D688;
-			remoteInfo = libtransmission;
 		};
 		ED91F3942CBDA9BD008388AA /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -986,6 +984,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"/Localized: QuickLookExtension/Localizable.strings",
+				DerivedFrameworks/LibTransmission.xcframework,
 				QuickLookExtension/PreviewProvider.mm,
 				QuickLookExtension/style.css,
 			);
@@ -1044,7 +1043,6 @@
 				EDD735D62D83087400852628 /* UniformTypeIdentifiers.framework in Frameworks */,
 				C87369652809984200573C90 /* UserNotifications.framework in Frameworks */,
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
-				4D1838DD09DEC0E80047D688 /* libtransmission.a in Frameworks */,
 				C0FFEE000000000000000017 /* IOKit.framework in Frameworks */,
 				C88771B52803EEB1005C7523 /* libiconv.tbd in Frameworks */,
 				55869926257074EC00F77A43 /* libcurl.tbd in Frameworks */,
@@ -1126,7 +1124,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				ED5E0E7E2CD30B180071433B /* Quartz.framework in Frameworks */,
-				ED5E0E9D2CD3134B0071433B /* libtransmission.a in Frameworks */,
 				ADD1A0000000000000000200 /* libz.tbd in Frameworks */,
 				ED5E0EA02CD3147B0071433B /* libcurl.tbd in Frameworks */,
 			);
@@ -1923,6 +1920,25 @@
 		};
 /* End PBXHeadersBuildPhase section */
 
+/* Begin PBXLegacyTarget section */
+		0AC6B36D306ED76F00528973 /* BuildLibTransmission */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "\"${PROJECT_DIR}/compile_lib.sh\"";
+			buildConfigurationList = 0AC6B36E306ED76F00528973 /* Build configuration list for PBXLegacyTarget "BuildLibTransmission" */;
+			buildPhases = (
+			);
+			buildToolPath = /bin/sh;
+			buildWorkingDirectory = "";
+			dependencies = (
+			);
+			name = BuildLibTransmission;
+			packageProductDependencies = (
+			);
+			passBuildSettingsInEnvironment = 1;
+			productName = BuildLibTransmission;
+		};
+/* End PBXLegacyTarget section */
+
 /* Begin PBXNativeTarget section */
 		3C7A118C0D0B2EB800B5701F /* natpmp */ = {
 			isa = PBXNativeTarget;
@@ -2000,7 +2016,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				4D1838E609DEC1170047D688 /* PBXTargetDependency */,
+				0AC6B375306EDA4000528973 /* PBXTargetDependency */,
 				ED5E0E8C2CD30B180071433B /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
@@ -2146,7 +2162,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				ED5E0E9F2CD3134B0071433B /* PBXTargetDependency */,
+				0AC6B373306EDA3C00528973 /* PBXTargetDependency */,
 			);
 			name = QuickLookExtension;
 			packageProductDependencies = (
@@ -2182,6 +2198,9 @@
 				LastUpgradeCheck = 2610;
 				ORGANIZATIONNAME = "The Transmission Project";
 				TargetAttributes = {
+					0AC6B36D306ED76F00528973 = {
+						CreatedOnToolsVersion = 26.5;
+					};
 					51D0F7010000000000000007 = {
 						CreatedOnToolsVersion = 16.0;
 					};
@@ -2252,6 +2271,7 @@
 				ED91F00B2CBDA5D3008388AA /* madler-crcany */,
 				51D0F7010000000000000007 /* simdutf */,
 				C0FFEE000000000000000007 /* woke */,
+				0AC6B36D306ED76F00528973 /* BuildLibTransmission */,
 			);
 		};
 /* End PBXProject section */
@@ -2739,10 +2759,15 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		4D1838E609DEC1170047D688 /* PBXTargetDependency */ = {
+		0AC6B373306EDA3C00528973 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 4D18389609DEC0030047D688 /* libtransmission */;
-			targetProxy = 4D1838E509DEC1170047D688 /* PBXContainerItemProxy */;
+			target = 0AC6B36D306ED76F00528973 /* BuildLibTransmission */;
+			targetProxy = 0AC6B372306EDA3C00528973 /* PBXContainerItemProxy */;
+		};
+		0AC6B375306EDA4000528973 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0AC6B36D306ED76F00528973 /* BuildLibTransmission */;
+			targetProxy = 0AC6B374306EDA4000528973 /* PBXContainerItemProxy */;
 		};
 		51D0F7010000000000000011 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -2793,11 +2818,6 @@
 			isa = PBXTargetDependency;
 			target = ED5E0E7B2CD30B180071433B /* QuickLookExtension */;
 			targetProxy = ED5E0E8B2CD30B180071433B /* PBXContainerItemProxy */;
-		};
-		ED5E0E9F2CD3134B0071433B /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 4D18389609DEC0030047D688 /* libtransmission */;
-			targetProxy = ED5E0E9E2CD3134B0071433B /* PBXContainerItemProxy */;
 		};
 		ED91F3952CBDA9BD008388AA /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -2983,6 +3003,96 @@
 				SDKROOT = macosx;
 			};
 			name = Debug;
+		};
+		0AC6B36F306ED76F00528973 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEBUGGING_SYMBOLS = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		0AC6B370306ED76F00528973 /* Release - Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = "Release - Debug";
+		};
+		0AC6B371306ED76F00528973 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
 		};
 		3C7A118E0D0B2EB800B5701F /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -3784,6 +3894,16 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		0AC6B36E306ED76F00528973 /* Build configuration list for PBXLegacyTarget "BuildLibTransmission" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0AC6B36F306ED76F00528973 /* Debug */,
+				0AC6B370306ED76F00528973 /* Release - Debug */,
+				0AC6B371306ED76F00528973 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		3C7A119B0D0B2EE300B5701F /* Build configuration list for PBXNativeTarget "natpmp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
