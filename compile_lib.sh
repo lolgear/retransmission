@@ -7,6 +7,14 @@ cd "$ROOT_DIR"
 
 # Fallback to Xcode environment variables or use defaults
 CONFIGURATION="${CONFIGURATION:-Debug}"
+
+# Fixing CMAKE_BUILD_TYPE ( change it in Xcode )
+if [ "$CONFIGURATION" = "Release - Debug" ]; then
+    CMAKE_BUILD_TYPE="RelWithDebInfo"
+else
+    CMAKE_BUILD_TYPE="$CONFIGURATION"
+fi
+
 # Xcode provides ARCHS separated by spaces, but CMake expects them separated by semicolons
 ARCHS="${ARCHS:-arm64}"
 CMAKE_ARCHS=$(echo "$ARCHS" | tr ' ' ';')
@@ -19,7 +27,7 @@ CMAKE_LIB_BUILD_DIRECTORY="${CMAKE_LIB_BUILD_DIRECTORY:-build_cmake}"
 CMAKE_LIB_INSTALL_DIRECTORY="${CMAKE_LIB_INSTALL_DIRECTORY:-build_install}"
 
 # Locate the Xcode project directory dynamically or fallback to root/macosx
-XCODE_PROJECT_DIR="${PROJECT_DIR:-$ROOT_DIR/macosx}"
+XCODE_PROJECT_DIR="${PROJECT_DIR:-$ROOT_DIR}/macosx"
 DERIVED_FRAMEWORKS_DIRECTORY="$XCODE_PROJECT_DIR/DerivedFrameworks"
 
 XCFRAMEWORK_FILE="$DERIVED_FRAMEWORKS_DIRECTORY/LibTransmission.xcframework"
@@ -27,18 +35,17 @@ XCFRAMEWORK_FILE="$DERIVED_FRAMEWORKS_DIRECTORY/LibTransmission.xcframework"
 echo "📌 Configuring LibTransmission version"
 sh "$ROOT_DIR/update-version-h.sh"
 
-echo "🛠 Configuring CMake ($CONFIGURATION, ARCHS: $CMAKE_ARCHS, SDK: $SDK_NAME)..."
+echo "🛠 Configuring CMake ($CONFIGURATION, BUILD_TYPE: $CMAKE_BUILD_TYPE, ARCHS: $CMAKE_ARCHS, SDK: $SDK_NAME)..."
 
 mkdir -p "$CMAKE_LIB_BUILD_DIRECTORY"
 cd "$CMAKE_LIB_BUILD_DIRECTORY"
 
 # Configure CMake with variables passed down from Xcode
 cmake -G "Ninja" .. \
-  -DCMAKE_BUILD_TYPE="$CONFIGURATION" \
+  -DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE" \
   -DCMAKE_OSX_ARCHITECTURES="$CMAKE_ARCHS" \
   -DCMAKE_OSX_SYSROOT="$SDK_NAME" \
   -DENABLE_IPO=OFF \
-  -DCMAKE_CXX_FLAGS=-DBUILD_MAC_CLIENT \
   -DUSE_SYSTEM_DEFAULT=OFF \
   -DENABLE_NLS=OFF \
   -DINSTALL_LIB=ON \
@@ -47,7 +54,7 @@ cmake -G "Ninja" .. \
   -DENABLE_UTILS=OFF -DENABLE_CLI=OFF -DENABLE_TESTS=OFF -DREBUILD_WEB=OFF
 
 echo "🏗 Compiling and natively installing core..."
-cmake --build . --config "$CONFIGURATION"
+cmake --build . --config "$CMAKE_BUILD_TYPE"
 cmake --install .
 
 cd "$ROOT_DIR"
