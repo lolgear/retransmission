@@ -700,28 +700,6 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
 
 - (void)applicationDidFinishLaunching:(NSNotification*)notification
 {
-    //cover our asses
-    if ([NSUserDefaults.standardUserDefaults boolForKey:@"WarningLegal"]) {
-        NSAlert* alert = [[NSAlert alloc] init];
-        [alert addButtonWithTitle:NSLocalizedString(@"I Accept", "Legal alert -> button")];
-        [alert addButtonWithTitle:NSLocalizedString(@"Quit", "Legal alert -> button")];
-        alert.messageText = [NSString stringWithFormat:NSLocalizedString(@"Welcome to %@", "Legal alert -> title"), @TR_PROJ_APPNAME_CAPITALIZED];
-        alert.informativeText = [NSString
-            stringWithFormat:NSLocalizedString(
-                                 @"%@ is a file-sharing program."
-                                  " When you run a torrent, its data will be made available to others by means of upload."
-                                  " You and you alone are fully responsible for exercising proper judgement and abiding by your local laws.",
-                                 "Legal alert -> message"),
-                             @TR_PROJ_APPNAME_CAPITALIZED];
-        alert.alertStyle = NSAlertStyleInformational;
-
-        if ([alert runModal] == NSAlertSecondButtonReturn) {
-            exit(0);
-        }
-
-        [NSUserDefaults.standardUserDefaults setBool:NO forKey:@"WarningLegal"];
-    }
-
     NSApp.servicesProvider = self;
 
     [PowerManager.shared setDelegate:self];
