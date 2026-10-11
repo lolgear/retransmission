@@ -68,6 +68,8 @@
 #import "Utils.h"
 #import "UTTypeAdditions.h"
 #import "NSURLAdditions.h"
+#import "MenuProvider.h"
+#import "NSMenuAdditions.h"
 
 typedef NSString* ToolbarItemIdentifier NS_TYPED_EXTENSIBLE_ENUM;
 
@@ -102,23 +104,6 @@ static SortType const SortTypeOrder = @"Order";
 static SortType const SortTypeActivity = @"Activity";
 static SortType const SortTypeSize = @"Size";
 static SortType const SortTypeETA = @"ETA";
-
-typedef NS_ENUM(NSUInteger, SortTag) {
-    SortTagOrder = 0,
-    SortTagDate = 1,
-    SortTagName = 2,
-    SortTagProgress = 3,
-    SortTagState = 4,
-    SortTagTracker = 5,
-    SortTagActivity = 6,
-    SortTagSize = 7,
-    SortTagETA = 8
-};
-
-typedef NS_ENUM(NSUInteger, SortOrderTag) { //
-    SortOrderTagAscending = 0,
-    SortOrderTagDescending = 1
-};
 
 typedef NS_ENUM(NSUInteger, AddType) { //
     AddTypeManual,
@@ -302,21 +287,14 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
 @property(nonatomic) NSLayoutConstraint* fFixedHeightConstraint;
 @property(nonatomic) IBOutlet TorrentTableView* fTableView;
 
-@property(nonatomic) IBOutlet NSMenuItem* fOpenIgnoreDownloadFolder;
 @property(nonatomic) IBOutlet NSButton* fActionButton;
 @property(nonatomic) IBOutlet NSButton* fSpeedLimitButton;
 @property(nonatomic) IBOutlet NSButton* fClearCompletedButton;
 @property(nonatomic) IBOutlet NSTextField* fTotalTorrentsField;
-@property(nonatomic) IBOutlet NSMenuItem* fNextFilterItem;
 
 @property(nonatomic) IBOutlet NSMenuItem* fNextInfoTabItem;
-@property(nonatomic) IBOutlet NSMenuItem* fPrevInfoTabItem;
 
 @property(nonatomic) IBOutlet NSMenu* fSortMenu;
-
-@property(nonatomic) IBOutlet NSMenu* fGroupsSetMenu;
-
-@property(nonatomic) IBOutlet NSMenu* fShareMenu;
 
 @property(nonatomic, readonly) tr_session* fLib;
 
@@ -983,6 +961,10 @@ static bool trashDataFile(std::string_view const filename, tr_error* const error
                               NSLog(@"UserNotifications not configured: %@", error.localizedDescription);
                           }
                       }];
+
+    MenuProvider* menuProvider = [[MenuProvider alloc] initWithController:self];
+    NSMenu* menu = [menuProvider buildMainMenu:_fUpdaterController];
+    NSApp.mainMenu = menu;
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification*)notification
@@ -1562,7 +1544,7 @@ static bool trashDataFile(std::string_view const filename, tr_error* const error
     [self openFiles:@[ dict[@"File"] ] addType:AddTypeCreated forcePath:dict[@"Path"]];
 }
 
-- (IBAction)openShowSheet:(id)sender
+- (IBAction)openShowSheet:(NSMenuItem*)sender
 {
     NSOpenPanel* panel = [NSOpenPanel openPanel];
 
@@ -1580,7 +1562,7 @@ static bool trashDataFile(std::string_view const filename, tr_error* const error
                 [filenames addObject:url.path];
             }
 
-            AddType const addType = sender == self.fOpenIgnoreDownloadFolder ? AddTypeShowOptions : AddTypeManual;
+            AddType const addType = sender.isOpenIgnoreDownloadFolderItem ? AddTypeShowOptions : AddTypeManual;
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self openFiles:filenames addType:addType forcePath:nil];
             });
@@ -2303,9 +2285,9 @@ static bool trashDataFile(std::string_view const filename, tr_error* const error
     }
 }
 
-- (IBAction)setInfoTab:(id)sender
+- (IBAction)setInfoTab:(NSMenuItem*)sender
 {
-    if (sender == self.fNextInfoTabItem) {
+    if (sender.isNextInfoTabItem) {
         [self.fInfoController setNextTab];
     } else {
         [self.fInfoController setPreviousTab];
@@ -3229,9 +3211,9 @@ static bool trashDataFile(std::string_view const filename, tr_error* const error
     }
 }
 
-- (IBAction)switchFilter:(id)sender
+- (IBAction)switchFilter:(NSMenuItem*)sender
 {
-    [self.fFilterBar switchFilter:sender == self.fNextFilterItem];
+    [self.fFilterBar switchFilter:sender.isNextFilterItem];
 }
 
 - (IBAction)showGlobalPopover:(id)sender
@@ -3275,7 +3257,7 @@ static bool trashDataFile(std::string_view const filename, tr_error* const error
 
 - (void)menuNeedsUpdate:(NSMenu*)menu
 {
-    if (menu == self.fGroupsSetMenu || [TorrentContextMenuProvider isGroupsSubmenu:menu]) {
+    if (menu.isGroupsSubmenu) {
         [menu removeAllItems];
 
         NSMenu* groupMenu = [GroupsController.groups groupMenuWithTarget:self action:@selector(setGroup:) isSmall:NO];
@@ -3286,7 +3268,7 @@ static bool trashDataFile(std::string_view const filename, tr_error* const error
             [groupMenu removeItemAtIndex:0];
             [menu addItem:item];
         }
-    } else if (menu == self.fShareMenu || [TorrentContextMenuProvider isShareSubmenu:menu]) {
+    } else if (menu.isShareSubmenu) {
         [menu removeAllItems];
 
         for (NSMenuItem* item in ShareTorrentFileHelper.sharedHelper.menuItems) {
