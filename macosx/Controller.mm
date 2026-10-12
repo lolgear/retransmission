@@ -1237,9 +1237,8 @@ static void offerToImportFromTransmission()
      completionHandler:(nonnull void (^)(NSURLSessionResponseDisposition))completionHandler
 {
     NSString* suggestedFilename = response.suggestedFilename;
-    BOOL isTorrent = [UTType isTorrentResponseWithMIMEType:response.MIMEType suggestedFilename:suggestedFilename];
 
-    if (isTorrent) {
+    if ([suggestedFilename.pathExtension.lowercaseString isEqualToString:@"torrent"]) {
         completionHandler(NSURLSessionResponseBecomeDownload);
         return;
     }
