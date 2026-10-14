@@ -11,7 +11,7 @@
 			isa = PBXAggregateTarget;
 			buildConfigurationList = 0AE23E8C307FF5CE003DAC2E /* Build configuration list for PBXAggregateTarget "BuildLibTransmission" */;
 			buildPhases = (
-				0AE23E90307FF5DC003DAC2E /* ShellScript */,
+				0AE23E90307FF5DC003DAC2E /* Build Library */,
 			);
 			dependencies = (
 			);
@@ -41,6 +41,20 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		0AE24364307FF732003DAC2E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0AE23E8B307FF5CD003DAC2E;
+			remoteInfo = BuildLibTransmission;
+		};
+		0AE24366307FF738003DAC2E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0AE23E8B307FF5CD003DAC2E;
+			remoteInfo = BuildLibTransmission;
+		};
 		ED5E0E8B2CD30B180071433B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -1177,6 +1191,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				0AE24365307FF732003DAC2E /* PBXTargetDependency */,
 				ED5E0E8C2CD30B180071433B /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
@@ -1199,6 +1214,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				0AE24367307FF738003DAC2E /* PBXTargetDependency */,
 			);
 			name = QuickLookExtension;
 			packageProductDependencies = (
@@ -1292,7 +1308,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		0AE23E90307FF5DC003DAC2E /* ShellScript */ = {
+		0AE23E90307FF5DC003DAC2E /* Build Library */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1300,11 +1316,16 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
-				"$(SRCROOT)/newInputFile",
+				"$(SRCROOT)/update-version.h.sh",
+				"$(SRCROOT)/CMakeLists.txt",
 			);
+			name = "Build Library";
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				"$(SRCROOT)/libtransmission/version.h",
+				"$(SRCROOT)/libtransmission/version.h.new",
+				"$(PROJECT_DIR)/DerivedFrameworks/LibTransmission.xcframework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -1330,6 +1351,16 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		0AE24365307FF732003DAC2E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0AE23E8B307FF5CD003DAC2E /* BuildLibTransmission */;
+			targetProxy = 0AE24364307FF732003DAC2E /* PBXContainerItemProxy */;
+		};
+		0AE24367307FF738003DAC2E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0AE23E8B307FF5CD003DAC2E /* BuildLibTransmission */;
+			targetProxy = 0AE24366307FF738003DAC2E /* PBXContainerItemProxy */;
+		};
 		ED5E0E8C2CD30B180071433B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = ED5E0E7B2CD30B180071433B /* QuickLookExtension */;
