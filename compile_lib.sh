@@ -25,7 +25,6 @@ SDK_NAME="${SDK_NAME:-macosx}"
 
 # Define directories relative to the repository root
 CMAKE_LIB_BUILD_DIRECTORY="${CMAKE_LIB_BUILD_DIRECTORY:-build/$CMAKE_BUILD_TYPE/cmake}"
-CMAKE_LIB_INSTALL_DIRECTORY="${CMAKE_LIB_INSTALL_DIRECTORY:-build/$CMAKE_BUILD_TYPE/install}"
 
 # Locate the Xcode project directory dynamically or fallback to root/macosx
 XCODE_PROJECT_DIR="${PROJECT_DIR:-$ROOT_DIR}/macosx"
@@ -35,7 +34,7 @@ XCFRAMEWORK_FILE="$DERIVED_FRAMEWORKS_DIRECTORY/LibTransmission.xcframework"
 
 if [ "$ACTION" = "clean" ]; then
     echo "🧹 Cleaning build artifacts"
-    rm -rf "$CMAKE_LIB_BUILD_DIRECTORY" "$CMAKE_LIB_INSTALL_DIRECTORY" "$XCFRAMEWORK_FILE"
+    rm -rf "$CMAKE_LIB_BUILD_DIRECTORY" "$XCFRAMEWORK_FILE"
     exit 0
 fi
 
@@ -58,7 +57,6 @@ cmake -G "Ninja" -S "$ROOT_DIR" -B . \
   -DUSE_SYSTEM_DEFAULT=OFF \
   -DENABLE_NLS=OFF \
   -DINSTALL_LIB=ON \
-  -DCMAKE_INSTALL_PREFIX="$ROOT_DIR/$CMAKE_LIB_INSTALL_DIRECTORY" \
   -DENABLE_DAEMON=OFF -DENABLE_GTK=OFF -DENABLE_QT=OFF -DENABLE_MAC=OFF \
   -DENABLE_UTILS=OFF -DENABLE_CLI=OFF -DENABLE_TESTS=OFF -DREBUILD_WEB=OFF
 
@@ -69,14 +67,14 @@ cd "$ROOT_DIR"
 
 echo "Checking native core library and external third-party dependencies"
 THIRD_PARTY_LIBS=$(find "$CMAKE_LIB_BUILD_DIRECTORY"/third-party -name "*.a" -not -path "*/src/_*-build/*")
-if [ -d "$XCFRAMEWORK_FILE" ] && [ -z "$(find "$CMAKE_LIB_INSTALL_DIRECTORY"/lib/libtransmission.a $THIRD_PARTY_LIBS -newer "$XCFRAMEWORK_FILE")" ]; then
+if [ -d "$XCFRAMEWORK_FILE" ] && [ -z "$(find "$CMAKE_LIB_BUILD_DIRECTORY"/lib/libtransmission.a $THIRD_PARTY_LIBS -newer "$XCFRAMEWORK_FILE")" ]; then
     echo "LibTransmission.xcframework is up to date"
     exit 0
 fi
 
 echo "📦 Merging native core library with external third-party dependencies..."
-mkdir -p "$CMAKE_LIB_INSTALL_DIRECTORY"/monolith
-libtool -static -o "$CMAKE_LIB_INSTALL_DIRECTORY"/monolith/libtransmission_combined.a "$CMAKE_LIB_INSTALL_DIRECTORY"/lib/libtransmission.a $THIRD_PARTY_LIBS
+mkdir -p "$CMAKE_LIB_BUILD_DIRECTORY"/monolith
+libtool -static -o "$CMAKE_LIB_BUILD_DIRECTORY"/monolith/libtransmission_combined.a "$CMAKE_LIB_BUILD_DIRECTORY"/lib/libtransmission.a $THIRD_PARTY_LIBS
 
 echo "🚀 Packaging everything into XCFramework at $XCFRAMEWORK_FILE..."
 mkdir -p "$DERIVED_FRAMEWORKS_DIRECTORY"
@@ -85,8 +83,7 @@ rm -rf "$XCFRAMEWORK_FILE"
 
 # Package the monolith archive as a static library framework slice
 xcodebuild -create-xcframework \
-  -library "$CMAKE_LIB_INSTALL_DIRECTORY"/monolith/libtransmission_combined.a \
-  -headers "$CMAKE_LIB_INSTALL_DIRECTORY"/include/transmission \
+  -library "$CMAKE_LIB_BUILD_DIRECTORY"/monolith/libtransmission_combined.a \
   -output "$XCFRAMEWORK_FILE"
 
 echo "🎉 PERFECT! Look at fresh $XCFRAMEWORK_FILE"
