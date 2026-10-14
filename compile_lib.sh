@@ -67,14 +67,14 @@ cd "$ROOT_DIR"
 
 echo "Checking native core library and external third-party dependencies"
 THIRD_PARTY_LIBS=$(find "$CMAKE_LIB_BUILD_DIRECTORY"/third-party -name "*.a" -not -path "*/src/_*-build/*")
-if [ -d "$XCFRAMEWORK_FILE" ] && [ -z "$(find "$CMAKE_LIB_BUILD_DIRECTORY"/lib/libtransmission.a $THIRD_PARTY_LIBS -newer "$XCFRAMEWORK_FILE")" ]; then
+if [ -d "$XCFRAMEWORK_FILE" ] && [ -z "$(find "$CMAKE_LIB_BUILD_DIRECTORY"/libtransmission/libtransmission.a $THIRD_PARTY_LIBS -newer "$XCFRAMEWORK_FILE")" ]; then
     echo "LibTransmission.xcframework is up to date"
     exit 0
 fi
 
 echo "📦 Merging native core library with external third-party dependencies..."
 mkdir -p "$CMAKE_LIB_BUILD_DIRECTORY"/monolith
-libtool -static -o "$CMAKE_LIB_BUILD_DIRECTORY"/monolith/libtransmission_combined.a "$CMAKE_LIB_BUILD_DIRECTORY"/lib/libtransmission.a $THIRD_PARTY_LIBS
+libtool -static -o "$CMAKE_LIB_BUILD_DIRECTORY"/monolith/libtransmission_combined.a "$CMAKE_LIB_BUILD_DIRECTORY"/libtransmission/libtransmission.a $THIRD_PARTY_LIBS
 
 echo "🚀 Packaging everything into XCFramework at $XCFRAMEWORK_FILE..."
 mkdir -p "$DERIVED_FRAMEWORKS_DIRECTORY"
