@@ -1,3 +1,7 @@
+// This file Copyright © Retransmission authors and contributors.
+// It may be used under the MIT (SPDX: MIT) license.
+// License text can be found in the licenses/ folder.
+
 #import "MenuProvider.h"
 
 #define LStr(key) NSLocalizedStringFromTable(key, @"AppMenu", @"")
