@@ -357,7 +357,8 @@ list(TRANSFORM BASE_XIB_FILES
 set(LANG_STRINGS_FILES
     GlobalOptionsPopover.strings
     InfoPlist.strings
-    Localizable.strings)
+    Localizable.strings
+    Preferences.strings)
 
 foreach(LANG ${ENABLED_LINGUAS})
     set(${LANG}_STRINGS_FILES)

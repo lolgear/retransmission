@@ -5,6 +5,8 @@
 #import "PrefsGeneralTabViewController.h"
 #import "DefaultAppHelper.h"
 
+#define LStr(key) NSLocalizedStringFromTable(key, @"Preferences", @"")
+
 @interface PrefsGeneralTabViewController ()
 
 @property(nonatomic) NSButton* fSystemPreferencesButton;
@@ -74,29 +76,31 @@
 
 - (void)createUIElements
 {
-    self.fAutoSizeButton = [NSButton checkboxWithTitle:@"Automatically size window to fit all transfers" target:self
+    self.fAutoSizeButton = [NSButton checkboxWithTitle:LStr(@"Automatically size window to fit all transfers") target:self
                                                 action:@selector(setAutoSize:)];
 
-    self.fBadgeDownloadButton = [NSButton checkboxWithTitle:@"Total download rate" target:self action:@selector(setBadge:)];
-    self.fBadgeUploadButton = [NSButton checkboxWithTitle:@"Total upload rate" target:self action:@selector(setBadge:)];
+    self.fBadgeDownloadButton = [NSButton checkboxWithTitle:LStr(@"Total download rate") target:self action:@selector(setBadge:)];
+    self.fBadgeUploadButton = [NSButton checkboxWithTitle:LStr(@"Total upload rate") target:self action:@selector(setBadge:)];
 
-    self.fSystemPreferencesButton = [NSButton buttonWithTitle:@"Configure In System Preferences" target:self
+    self.fSystemPreferencesButton = [NSButton buttonWithTitle:LStr(@"Configure In System Preferences") target:self
                                                        action:@selector(openNotificationSystemPrefs:)];
 
-    self.fPromptRemoveButton = [NSButton checkboxWithTitle:@"Removal of active transfers" target:nil action:nil];
-    self.fPromptRemoveDownloadingButton = [NSButton checkboxWithTitle:@"Only when transfers are downloading" target:nil action:nil];
-    self.fPromptQuitButton = [NSButton checkboxWithTitle:@"Quit with active transfers" target:nil action:nil];
-    self.fPromptQuitDownloadingButton = [NSButton checkboxWithTitle:@"Only when transfers are downloading" target:nil action:nil];
+    self.fPromptRemoveButton = [NSButton checkboxWithTitle:LStr(@"Removal of active transfers") target:nil action:nil];
+    self.fPromptRemoveDownloadingButton = [NSButton checkboxWithTitle:LStr(@"Only when transfers are downloading") target:nil
+                                                               action:nil];
+    self.fPromptQuitButton = [NSButton checkboxWithTitle:LStr(@"Quit with active transfers") target:nil action:nil];
+    self.fPromptQuitDownloadingButton = [NSButton checkboxWithTitle:LStr(@"Only when transfers are downloading") target:nil
+                                                             action:nil];
 
-    self.fResetWarningsButton = [NSButton buttonWithTitle:@"Reset" target:self action:@selector(resetWarnings:)];
+    self.fResetWarningsButton = [NSButton buttonWithTitle:LStr(@"Reset") target:self action:@selector(resetWarnings:)];
 
-    self.fSetDefaultForMagnetButton = [NSButton buttonWithTitle:@"Set Default Application" target:self
+    self.fSetDefaultForMagnetButton = [NSButton buttonWithTitle:LStr(@"Set Default Application") target:self
                                                          action:@selector(setDefaultForMagnets:)];
-    self.fSetDefaultForTorrentButton = [NSButton buttonWithTitle:@"Set Default Application" target:self
+    self.fSetDefaultForTorrentButton = [NSButton buttonWithTitle:LStr(@"Set Default Application") target:self
                                                           action:@selector(setDefaultForTorrentFiles:)];
 
-    self.fCheckForUpdatesButton = [NSButton checkboxWithTitle:@"Automatically check daily" target:nil action:nil];
-    self.fCheckForUpdatesBetaButton = [NSButton checkboxWithTitle:@"Include beta releases" target:nil action:nil];
+    self.fCheckForUpdatesButton = [NSButton checkboxWithTitle:LStr(@"Automatically check daily") target:nil action:nil];
+    self.fCheckForUpdatesBetaButton = [NSButton checkboxWithTitle:LStr(@"Include beta releases") target:nil action:nil];
 }
 
 #pragma mark - Layout Setup
@@ -111,15 +115,15 @@
     gridView.xPlacement = NSGridCellPlacementLeading;
     gridView.yPlacement = NSGridCellPlacementCenter;
 
-    [gridView addRowWithViews:@[ [NSTextField labelWithString:@"Auto resize:"], self.fAutoSizeButton ]];
+    [gridView addRowWithViews:@[ [NSTextField labelWithString:LStr(@"Auto resize:")], self.fAutoSizeButton ]];
 
-    [gridView addRowWithViews:@[ [NSTextField labelWithString:@"Badge Dock icon with:"], self.fBadgeDownloadButton ]];
+    [gridView addRowWithViews:@[ [NSTextField labelWithString:LStr(@"Badge Dock icon with:")], self.fBadgeDownloadButton ]];
 
     [gridView addRowWithViews:@[ NSGridCell.emptyContentView, self.fBadgeUploadButton ]];
 
-    [gridView addRowWithViews:@[ [NSTextField labelWithString:@"Notifications:"], self.fSystemPreferencesButton ]];
+    [gridView addRowWithViews:@[ [NSTextField labelWithString:LStr(@"Notifications:")], self.fSystemPreferencesButton ]];
 
-    [gridView addRowWithViews:@[ [NSTextField labelWithString:@"Prompt user for:"], self.fPromptRemoveButton ]];
+    [gridView addRowWithViews:@[ [NSTextField labelWithString:LStr(@"Prompt user for:")], self.fPromptRemoveButton ]];
 
     NSStackView* fPromptRemoveDownloadingButtonStack = [[NSStackView alloc] init];
     [fPromptRemoveDownloadingButtonStack addArrangedSubview:self.fPromptRemoveDownloadingButton];
@@ -134,13 +138,15 @@
 
     [gridView addRowWithViews:@[ NSGridCell.emptyContentView, fPromptQuitDownloadingButtonStack ]];
 
-    [gridView addRowWithViews:@[ [NSTextField labelWithString:@"Reset all alerts:"], self.fResetWarningsButton ]];
+    [gridView addRowWithViews:@[ [NSTextField labelWithString:LStr(@"Reset all alerts:")], self.fResetWarningsButton ]];
 
-    [gridView addRowWithViews:@[ [NSTextField labelWithString:@"Accept magnet links:"], self.fSetDefaultForMagnetButton ]];
+    [gridView
+        addRowWithViews:@[ [NSTextField labelWithString:LStr(@"Accept magnet links:")], self.fSetDefaultForMagnetButton ]];
 
-    [gridView addRowWithViews:@[ [NSTextField labelWithString:@"Open torrent files:"], self.fSetDefaultForTorrentButton ]];
+    [gridView
+        addRowWithViews:@[ [NSTextField labelWithString:LStr(@"Open torrent files:")], self.fSetDefaultForTorrentButton ]];
 
-    [gridView addRowWithViews:@[ [NSTextField labelWithString:@"Check for update:"], self.fCheckForUpdatesButton ]];
+    [gridView addRowWithViews:@[ [NSTextField labelWithString:LStr(@"Check for update:")], self.fCheckForUpdatesButton ]];
 
     [gridView addRowWithViews:@[ NSGridCell.emptyContentView, self.fCheckForUpdatesBetaButton ]];
 
