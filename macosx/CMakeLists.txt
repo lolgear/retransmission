@@ -120,6 +120,8 @@ target_sources(${TR_NAME}-mac
         main.mm
         MenuProvider.h
         MenuProvider.mm
+        MessageLogsViews.h
+        MessageLogsViews.mm
         MessageWindowController.h
         MessageWindowController.mm
         NSApplicationAdditions.h
@@ -205,9 +207,6 @@ target_sources(${TR_NAME}-mac
         Utils.mm
         UTTypeAdditions.h
         UTTypeAdditions.mm)
-
-set(XIB_FILES
-    MessageWindow.xib)
 
 set(RESOURCES
     Defaults.plist
@@ -397,7 +396,6 @@ target_sources(${TR_NAME}-mac
         ${RESOURCES})
 
 tr_target_xib_files(${TR_NAME}-mac
-    ${XIB_FILES}
     ${BASE_XIB_FILES})
 
 find_library(SPARKLE_FRAMEWORK Sparkle
