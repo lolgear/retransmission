@@ -53,8 +53,22 @@
             [textField.topAnchor constraintEqualToAnchor:self.topAnchor constant:2],
             [textField.bottomAnchor constraintEqualToAnchor:self.bottomAnchor constant:-2]
         ]];
+
+        [textField setContentCompressionResistancePriority:NSLayoutPriorityDefaultLow
+                                            forOrientation:NSLayoutConstraintOrientationHorizontal];
+        [textField setContentHuggingPriority:NSLayoutPriorityDefaultLow forOrientation:NSLayoutConstraintOrientationHorizontal];
     }
     return self;
+}
+
+- (void)layout
+{
+    [super layout];
+
+    if (self.textField.usesSingleLineMode == NO) {
+        self.textField.preferredMaxLayoutWidth = NSWidth(self.bounds) - 4;
+        [self.textField invalidateIntrinsicContentSize];
+    }
 }
 
 - (void)configureForMultiline:(BOOL)isMultiline
@@ -62,7 +76,7 @@
     if (isMultiline) {
         self.textField.usesSingleLineMode = NO;
         self.textField.cell.wraps = YES;
-        self.textField.cell.lineBreakMode = NSLineBreakByWordWrapping;
+        self.textField.lineBreakMode = NSLineBreakByWordWrapping;
     } else {
         self.textField.usesSingleLineMode = YES;
         self.textField.lineBreakMode = NSLineBreakByTruncatingTail;

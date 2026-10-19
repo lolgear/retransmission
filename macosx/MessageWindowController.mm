@@ -137,7 +137,7 @@ static NSUInteger const kMaxQueueLength = 10000U;
     self.fMessageTable.allowsColumnReordering = NO;
     self.fMessageTable.allowsMultipleSelection = YES;
     self.fMessageTable.autosaveName = @"LogTableView";
-    self.fMessageTable.rowHeight = 14;
+    self.fMessageTable.rowHeight = 18;
     self.fMessageTable.usesAutomaticRowHeights = YES;
     self.fMessageTable.style = NSTableViewStyleFullWidth;
     self.fMessageTable.intercellSpacing = NSMakeSize(3, 2);
@@ -376,9 +376,18 @@ static NSUInteger const kMaxQueueLength = 10000U;
     if (changed) {
         [self.fDisplayedMessages sortUsingDescriptors:self.fMessageTable.sortDescriptors];
 
+        NSIndexSet* selectedIndexes = self.fMessageTable.selectedRowIndexes;
+
         [self.fMessageTable reloadData];
-        if (shouldScroll)
+
+        if (selectedIndexes.count > 0) {
+            [self.fMessageTable selectRowIndexes:selectedIndexes byExtendingSelection:NO];
+        }
+
+        if (shouldScroll) {
+            [self.fMessageTable layoutSubtreeIfNeeded];
             [self.fMessageTable scrollRowToVisible:self.fMessageTable.numberOfRows - 1];
+        }
     }
 
     [self.fLock unlock];
@@ -439,6 +448,39 @@ static NSUInteger const kMaxQueueLength = 10000U;
 {
     [self.fDisplayedMessages sortUsingDescriptors:self.fMessageTable.sortDescriptors];
     [self.fMessageTable reloadData];
+}
+
+- (void)tableViewColumnDidResize:(NSNotification*)notification
+{
+    [self.fMessageTable
+        noteHeightOfRowsWithIndexesChanged:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, self.fMessageTable.numberOfRows)]];
+}
+
+- (CGFloat)tableView:(NSTableView*)tableView sizeToFitWidthOfColumn:(NSInteger)column
+{
+    NSTableColumn* tableColumn = tableView.tableColumns[column];
+    NSRange visibleRows = [tableView rowsInRect:tableView.visibleRect];
+
+    if (visibleRows.length == 0) {
+        return tableColumn.minWidth;
+    }
+
+    CGFloat maxWidth = tableColumn.minWidth;
+
+    for (NSUInteger row = visibleRows.location; row < NSMaxRange(visibleRows); row++) {
+        NSView* view = [tableView viewAtColumn:column row:row makeIfNecessary:YES];
+        if (!view) {
+            continue;
+        }
+
+        NSSize fittingSize = [view fittingSize];
+
+        if (fittingSize.width > maxWidth) {
+            maxWidth = fittingSize.width;
+        }
+    }
+
+    return MIN(maxWidth, tableColumn.maxWidth);
 }
 
 - (void)copy:(id)sender
