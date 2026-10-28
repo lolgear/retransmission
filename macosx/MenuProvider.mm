@@ -160,6 +160,8 @@
         [sortMenu addItem:item];
     }
 
+    [sortMenu addItem:[NSMenuItem separatorItem]];
+
     NSMenuItem* asc = [sortMenu addItemWithTitle:LStr(@"Ascending") action:@selector(setSortReverse:) keyEquivalent:@""];
     asc.image = [NSImage imageWithSystemSymbolName:@"arrow.up" accessibilityDescription:nil];
 

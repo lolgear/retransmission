@@ -92,12 +92,16 @@ static NSUserInterfaceItemIdentifier const TRMenuItemRolePrevInfoIdentifier = @"
     switch (role) {
     case TRMenuItemRoleOpenIgnoreDownloadFolder:
         self.identifier = TRMenuItemRoleOpenIgnoreDownloadFolderIdentifier;
+        break;
     case TRMenuItemRoleNextFilter:
         self.identifier = TRMenuItemRoleNextFilterIdentifier;
+        break;
     case TRMenuItemRoleNextInfo:
         self.identifier = TRMenuItemRoleNextInfoIdentifier;
+        break;
     case TRMenuItemRolePrevInfo:
         self.identifier = TRMenuItemRolePrevInfoIdentifier;
+        break;
     }
 }
 

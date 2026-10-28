@@ -292,10 +292,6 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
 @property(nonatomic) IBOutlet NSButton* fClearCompletedButton;
 @property(nonatomic) IBOutlet NSTextField* fTotalTorrentsField;
 
-@property(nonatomic) IBOutlet NSMenuItem* fNextInfoTabItem;
-
-@property(nonatomic) IBOutlet NSMenu* fSortMenu;
-
 @property(nonatomic, readonly) tr_session* fLib;
 
 @property(nonatomic, readonly) NSMutableArray<Torrent*>* fTorrents;
@@ -808,31 +804,6 @@ static bool trashDataFile(std::string_view const filename, tr_error* const error
 
     [self.fTableView registerForDraggedTypes:@[ kTorrentTableViewDataType ]];
     [self.fWindow registerForDraggedTypes:@[ NSPasteboardTypeFileURL, NSPasteboardTypeURL ]];
-
-    //sort the sort menu items (localization is from strings file)
-    NSMutableArray* sortMenuItems = [NSMutableArray arrayWithCapacity:7];
-    NSUInteger sortMenuIndex = 0;
-    BOOL foundSortItem = NO;
-    for (NSMenuItem* item in self.fSortMenu.itemArray) {
-        //assume all sort items are together and the Queue Order item is first
-        if (item.action == @selector(setSort:) && item.tag != SortTagOrder) {
-            [sortMenuItems addObject:item];
-            [self.fSortMenu removeItemAtIndex:sortMenuIndex];
-            foundSortItem = YES;
-        } else {
-            if (foundSortItem) {
-                break;
-            }
-            ++sortMenuIndex;
-        }
-    }
-
-    [sortMenuItems sortUsingDescriptors:@[ [NSSortDescriptor sortDescriptorWithKey:@"title" ascending:YES
-                                                                          selector:@selector(localizedCompare:)] ]];
-
-    for (NSMenuItem* item in sortMenuItems) {
-        [self.fSortMenu insertItem:item atIndex:sortMenuIndex++];
-    }
 
     //you would think this would be called later in this method from updateUI, but it's not reached in awakeFromNib
     //this must be called after showStatusBar:
@@ -1544,7 +1515,7 @@ static bool trashDataFile(std::string_view const filename, tr_error* const error
     [self openFiles:@[ dict[@"File"] ] addType:AddTypeCreated forcePath:dict[@"Path"]];
 }
 
-- (IBAction)openShowSheet:(NSMenuItem*)sender
+- (IBAction)openShowSheet:(id)sender
 {
     NSOpenPanel* panel = [NSOpenPanel openPanel];
 
@@ -1562,7 +1533,8 @@ static bool trashDataFile(std::string_view const filename, tr_error* const error
                 [filenames addObject:url.path];
             }
 
-            AddType const addType = sender.isOpenIgnoreDownloadFolderItem ? AddTypeShowOptions : AddTypeManual;
+            BOOL const showOptions = [sender isKindOfClass:[NSMenuItem class]] && [(NSMenuItem*)sender isOpenIgnoreDownloadFolderItem];
+            AddType const addType = showOptions ? AddTypeShowOptions : AddTypeManual;
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self openFiles:filenames addType:addType forcePath:nil];
             });
