@@ -189,6 +189,10 @@ target_sources(${TR_NAME}-mac
         TorrentContextMenuProvider.mm
         TorrentGroup.h
         TorrentGroup.mm
+        TorrentMainView.h
+        TorrentMainView.mm
+        TorrentMainWindow.h
+        TorrentMainWindow.mm
         TorrentTableView.h
         TorrentTableView.mm
         TrackerIconLoader.h
@@ -349,7 +353,6 @@ set(BASE_XIB_FILES
     GroupRules.xib
     InfoActivityView.xib
     InfoOptionsView.xib
-    MainMenu.xib
     PrefsWindow.xib)
 list(TRANSFORM BASE_XIB_FILES
     PREPEND Base.lproj/)

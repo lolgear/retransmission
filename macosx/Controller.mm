@@ -70,6 +70,8 @@
 #import "NSURLAdditions.h"
 #import "MenuProvider.h"
 #import "NSMenuAdditions.h"
+#import "TorrentMainWindow.h"
+#import "TorrentMainView.h"
 
 typedef NSString* ToolbarItemIdentifier NS_TYPED_EXTENSIBLE_ENUM;
 
@@ -278,17 +280,18 @@ static auto getSettingsFromNSUserDefaults(NSUserDefaults* defaults)
     return settings;
 }
 
-@interface Controller ()<NSApplicationDelegate, NSMenuItemValidation, NSPopoverDelegate, NSSharingServicePickerDelegate, NSToolbarDelegate, NSToolbarItemValidation, NSURLSessionDataDelegate, NSURLSessionDownloadDelegate, NSWindowDelegate, PowerManagerDelegate, QLPreviewPanelDataSource, QLPreviewPanelDelegate, SPUUpdaterDelegate, UNUserNotificationCenterDelegate, VDKQueueDelegate>
+@interface Controller ()<NSApplicationDelegate, NSOutlineViewDataSource, NSMenuItemValidation, NSPopoverDelegate, NSSharingServicePickerDelegate, NSToolbarDelegate, NSToolbarItemValidation, NSURLSessionDataDelegate, NSURLSessionDownloadDelegate, NSWindowDelegate, PowerManagerDelegate, QLPreviewPanelDataSource, QLPreviewPanelDelegate, SPUUpdaterDelegate, UNUserNotificationCenterDelegate, VDKQueueDelegate>
 
 @property(nonatomic) NSLayoutConstraint* fMinHeightConstraint;
-@property(nonatomic) IBOutlet NSWindow* fWindow;
-@property(nonatomic) IBOutlet SPUStandardUpdaterController* fUpdaterController;
-@property(nonatomic) IBOutlet TorrentTableView* fTableView;
+@property(nonatomic) TorrentMainWindow* fWindow;
+@property(nonatomic) TorrentMainView* fMainView;
+@property(nonatomic) SPUStandardUpdaterController* fUpdaterController;
+@property(nonatomic, readonly) TorrentTableView* fTableView;
 
-@property(nonatomic) IBOutlet NSButton* fActionButton;
-@property(nonatomic) IBOutlet NSButton* fSpeedLimitButton;
-@property(nonatomic) IBOutlet NSButton* fClearCompletedButton;
-@property(nonatomic) IBOutlet NSTextField* fTotalTorrentsField;
+@property(nonatomic, readonly) NSButton* fActionButton;
+@property(nonatomic, readonly) NSButton* fSpeedLimitButton;
+@property(nonatomic, readonly) NSButton* fClearCompletedButton;
+@property(nonatomic, readonly) NSTextField* fTotalTorrentsField;
 
 @property(nonatomic, readonly) tr_session* fLib;
 
@@ -639,7 +642,7 @@ static bool trashDataFile(std::string_view const filename, tr_error* const error
     }
 
     // Offered only on the first launch, before this app has settings or transfers of its own.
-    // It runs before the main nib loads, so every object sees what was imported.
+    // It runs before Controller is created, so every object sees what was imported.
     if (![defaults boolForKey:kTransmissionImportOfferedKey]) {
         offerToImportFromTransmission();
         [defaults setBool:YES forKey:kTransmissionImportOfferedKey];
@@ -708,6 +711,11 @@ static bool trashDataFile(std::string_view const filename, tr_error* const error
             });
         });
 
+        _fMainView = [[TorrentMainView alloc] initWithFrame:NSZeroRect];
+        _fWindow = [[TorrentMainWindow alloc] initWindowWithContentView:_fMainView];
+
+        [self bindInterfaceActions];
+
         NSApp.delegate = self;
 
         _fTorrents = [[NSMutableArray alloc] init];
@@ -747,14 +755,59 @@ static bool trashDataFile(std::string_view const filename, tr_error* const error
         _fQuitRequested = NO;
 
         _fPauseOnLaunch = (NSEvent.modifierFlags & NSEventModifierFlagOption) != 0;
+
+        [self configureMainWindowLayout];
     }
     return self;
 }
 
-- (void)awakeFromNib
+- (TorrentTableView*)fTableView
 {
-    [super awakeFromNib];
+    return self.fMainView.tableView;
+}
 
+- (NSButton*)fActionButton
+{
+    return self.fMainView.globalActionsButton;
+}
+
+- (NSButton*)fSpeedLimitButton
+{
+    return self.fMainView.speedLimitButton;
+}
+
+- (NSButton*)fClearCompletedButton
+{
+    return self.fMainView.clearCompletedButton;
+}
+
+- (NSTextField*)fTotalTorrentsField
+{
+    return self.fMainView.totalTorrentsField;
+}
+
+- (void)bindInterfaceActions
+{
+    self.fTableView.dataSource = self;
+
+    self.fActionButton.target = self;
+    self.fActionButton.action = @selector(showGlobalPopover:);
+
+    self.fSpeedLimitButton.target = self;
+    self.fSpeedLimitButton.action = @selector(speedLimitChanged:);
+
+    self.fClearCompletedButton.target = self;
+    self.fClearCompletedButton.action = @selector(clearCompleted:);
+
+    [self.fSpeedLimitButton bind:NSValueBinding toObject:NSUserDefaultsController.sharedUserDefaultsController
+                     withKeyPath:@"values.SpeedLimit"
+                         options:nil];
+
+    self.fTableView.fController = self;
+}
+
+- (void)configureMainWindowLayout
+{
     Toolbar* toolbar = [[Toolbar alloc] initWithIdentifier:@"TRMainToolbar"];
     toolbar.delegate = self;
     toolbar.allowsUserCustomization = YES;
@@ -806,8 +859,8 @@ static bool trashDataFile(std::string_view const filename, tr_error* const error
     [self.fTableView registerForDraggedTypes:@[ kTorrentTableViewDataType ]];
     [self.fWindow registerForDraggedTypes:@[ NSPasteboardTypeFileURL, NSPasteboardTypeURL ]];
 
-    //you would think this would be called later in this method from updateUI, but it's not reached in awakeFromNib
-    //this must be called after showStatusBar:
+    // you would think this would be called later in this method from updateUI, but it's not reached in configureMainWindowLayout.
+    // this must be called after showStatusBar:
     [self.fStatusBar updateWithDownload:0.0 upload:0.0];
 
     auto* const session = self.fLib;
@@ -933,7 +986,8 @@ static bool trashDataFile(std::string_view const filename, tr_error* const error
                       }];
 
     MenuProvider* menuProvider = [[MenuProvider alloc] initWithController:self];
-    NSMenu* menu = [menuProvider buildMainMenu:_fUpdaterController];
+    self.fUpdaterController = [[SPUStandardUpdaterController alloc] initWithUpdaterDelegate:self userDriverDelegate:nil];
+    NSMenu* menu = [menuProvider buildMainMenu:self.fUpdaterController];
     NSApp.mainMenu = menu;
 }
 
