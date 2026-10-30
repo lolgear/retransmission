@@ -17,6 +17,8 @@
 #import "NSStringAdditions.h"
 #import "UTTypeAdditions.h"
 
+#define LStr(key) NSLocalizedStringFromTable(key, @"Creator", @"")
+
 typedef NS_ENUM(NSUInteger, TrackerSegmentTag) {
     TrackerSegmentTagAdd = 0,
     TrackerSegmentTagRemove = 1,
@@ -37,8 +39,8 @@ typedef NS_ENUM(NSUInteger, TrackerSegmentTag) {
 @property(nonatomic) IBOutlet NSTextField* fSource;
 @property(nonatomic) IBOutlet NSStepper* fPieceSizeStepper;
 
-@property(nonatomic) IBOutlet NSView* fProgressView;
-@property(nonatomic) IBOutlet NSProgressIndicator* fProgressIndicator;
+@property(nonatomic) NSAlert* fProgressAlert;
+@property(nonatomic) NSProgressIndicator* fProgressIndicator;
 
 @property(nonatomic, readonly) std::shared_ptr<tr_metainfo_builder> fBuilder;
 @property(nonatomic, readonly) NSURL* fPath;
@@ -314,7 +316,7 @@ static NSMutableSet* creatorWindowControllerSet;
     [creatorWindowControllerSet removeObject:self];
 }
 
-- (IBAction)cancelCreateProgress:(id)sender
+- (void)handleProgressCancellation
 {
     self.fBuilder->cancel_checksums();
     [self.fTimer fire];
@@ -563,6 +565,35 @@ static NSMutableSet* creatorWindowControllerSet;
     self.fTimer = [NSTimer scheduledTimerWithTimeInterval:0.1 repeats:YES block:^(NSTimer* _Nonnull) {
         [weakSelf checkProgress];
     }];
+
+    [self startProgress];
+}
+
+- (void)configureProgressAlert
+{
+    self.fProgressAlert = [[NSAlert alloc] init];
+    self.fProgressAlert.messageText = LStr(@"83.title"); // Creating torrent file…
+    self.fProgressAlert.alertStyle = NSAlertStyleInformational;
+
+    NSButton* cancelButton = [self.fProgressAlert addButtonWithTitle:LStr(@"82.title")]; // Cancel
+    cancelButton.target = self;
+    cancelButton.action = @selector(handleProgressCancellation);
+    cancelButton.keyEquivalent = @"\e"; // Esc
+
+    self.fProgressIndicator = [[NSProgressIndicator alloc] initWithFrame:NSMakeRect(0, 0, 300, 20)];
+    self.fProgressIndicator.indeterminate = NO;
+    self.fProgressIndicator.minValue = 0.0;
+    self.fProgressIndicator.maxValue = 1.0;
+    self.fProgressIndicator.doubleValue = 0.0;
+    self.fProgressIndicator.style = NSProgressIndicatorStyleBar;
+
+    self.fProgressAlert.accessoryView = self.fProgressIndicator;
+}
+
+- (void)startProgress
+{
+    [self configureProgressAlert];
+    [self.fProgressAlert beginSheetModalForWindow:self.window completionHandler:nil];
 }
 
 - (void)checkProgress
@@ -575,35 +606,19 @@ static NSMutableSet* creatorWindowControllerSet;
 
         if (!self.fStarted) {
             self.fStarted = YES;
-
-            self.fProgressView.hidden = YES;
-
-            NSWindow* window = self.window;
-            window.frameAutosaveName = @"";
-
-            NSRect windowRect = window.frame;
-            CGFloat difference = self.fProgressView.frame.size.height - window.contentView.frame.size.height;
-            windowRect.origin.y -= difference;
-            windowRect.size.height += difference;
-
-            //don't allow vertical resizing
-            CGFloat height = windowRect.size.height;
-            window.minSize = NSMakeSize(window.minSize.width, height);
-            window.maxSize = NSMakeSize(window.maxSize.width, height);
-
-            window.contentView = self.fProgressView;
-            [window setFrame:windowRect display:YES animate:YES];
-            self.fProgressView.hidden = NO;
-
-            [window standardWindowButton:NSWindowCloseButton].enabled = NO;
+            [self.window standardWindowButton:NSWindowCloseButton].enabled = NO;
         }
-
         return;
     }
 
     // stop the timer
     [self.fTimer invalidate];
     self.fTimer = nil;
+
+    if (self.fProgressAlert) {
+        [self.window endSheet:self.fProgressAlert.window returnCode:NSModalResponseStop];
+        self.fProgressAlert = nil;
+    }
 
     auto checksums = self.fFuture.get();
     auto error = std::move(checksums.error);
