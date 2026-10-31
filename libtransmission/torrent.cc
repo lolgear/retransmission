@@ -55,15 +55,6 @@ struct tr_torrent_builder;
 using namespace std::literals;
 using namespace tr::Values;
 
-namespace
-{
-// for the `_deprecated` float fields
-[[nodiscard]] constexpr float as_float(Percent const percent) noexcept
-{
-    return static_cast<float>(percent.quotient());
-}
-} // namespace
-
 #define tr_return_if_fail(expr) \
     do { \
         if (expr) [[likely]] { \
@@ -1363,19 +1354,15 @@ tr_stat tr_torrent::stats() const
     stats.piece_download_speed = piece_download_speed;
 
     stats.percent_complete = this->completion_.percent_complete();
-    stats.percent_complete_deprecated = as_float(stats.percent_complete);
     stats.metadata_percent_complete = get_metadata_percent();
-    stats.metadata_percent_complete_deprecated = as_float(stats.metadata_percent_complete);
     stats.metadata_have = stats.metadata_percent_complete.have();
     stats.metadata_size = stats.metadata_percent_complete.total();
 
     stats.percent_done = this->completion_.percent_done();
-    stats.percent_done_deprecated = as_float(stats.percent_done);
     stats.left_until_done = this->completion_.left_until_done();
     stats.size_when_done = this->completion_.size_when_done();
 
     stats.recheck_progress = verify_progress().value_or(Percent{});
-    stats.recheck_progress_deprecated = as_float(stats.recheck_progress);
     stats.checked_bytes = stats.recheck_progress.have();
     stats.activity_date = this->date_active_;
     stats.added_date = this->date_added_;
@@ -1393,7 +1380,6 @@ tr_stat tr_torrent::stats() const
     stats.desired_available = tr_peerMgrGetDesiredAvailable(this);
 
     stats.upload_ratio = Ratio{ stats.uploaded_ever, stats.size_when_done };
-    stats.upload_ratio_deprecated = static_cast<float>(tr_getRatio(stats.uploaded_ever, stats.size_when_done));
 
     auto seed_ratio_bytes_left = uint64_t{};
     auto seed_ratio_bytes_goal = uint64_t{};
@@ -1434,7 +1420,6 @@ tr_stat tr_torrent::stats() const
     } else {
         stats.seed_ratio_percent_done = Percent{ seed_ratio_bytes_goal - seed_ratio_bytes_left, seed_ratio_bytes_goal };
     }
-    stats.seed_ratio_percent_done_deprecated = as_float(stats.seed_ratio_percent_done);
 
     /* test some of the constraints */
     TR_ASSERT(stats.size_when_done <= this->total_size());
@@ -1479,13 +1464,11 @@ tr_file_view tr_torrentFile(tr_torrent const* tor, tr_file_index_t file)
     auto const [begin, end] = tor->piece_span_for_file(file);
 
     auto const have = tor->is_seed() || length == 0 ? length : tor->count_has_bytes_in_file(file);
-    auto const progress = Percent{ have, length };
     return {
         .name = subpath.c_str(),
         .have = have,
         .length = length,
-        .progress = progress,
-        .progress_deprecated = progress.quotient(),
+        .progress = Percent{ have, length },
         .beginPiece = begin,
         .endPiece = end,
         .priority = priority,

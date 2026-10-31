@@ -416,10 +416,9 @@ void notifyBatchQueueChange(tr_session* session, std::vector<tr_torrent*> const&
 
 namespace make_torrent_field_helpers
 {
-// the wire keeps the TR_RATIO_NA / TR_RATIO_INF sentinels for the two non-numeric states
 [[nodiscard]] constexpr double ratio_to_wire(Ratio const ratio) noexcept
 {
-    return ratio.quotient().value_or(ratio.is_infinite() ? TR_RATIO_INF : TR_RATIO_NA);
+    return ratio.quotient().value_or(ratio.is_infinite() ? Ratio::WireInfinite : Ratio::WireNone);
 }
 
 [[nodiscard]] auto make_file_wanted_vec(tr_torrent const& tor)
@@ -727,6 +726,8 @@ namespace make_torrent_field_helpers
     case TR_KEY_seconds_seeding:
     case TR_KEY_seed_idle_limit:
     case TR_KEY_seed_idle_mode:
+    case TR_KEY_seed_ratio_bytes_goal:
+    case TR_KEY_seed_ratio_bytes_left:
     case TR_KEY_seed_ratio_limit:
     case TR_KEY_seed_ratio_mode:
     case TR_KEY_sequential_download:
@@ -892,6 +893,10 @@ namespace make_torrent_field_helpers
         return tor.idle_limit_minutes();
     case TR_KEY_seed_idle_mode:
         return tor.idle_limit_mode();
+    case TR_KEY_seed_ratio_bytes_goal:
+        return st.seed_ratio_percent_done.total();
+    case TR_KEY_seed_ratio_bytes_left:
+        return st.seed_ratio_percent_done.total() - st.seed_ratio_percent_done.have();
     case TR_KEY_seed_ratio_limit:
         return tor.seed_ratio();
     case TR_KEY_seed_ratio_mode:
